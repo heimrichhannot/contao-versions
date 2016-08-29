@@ -28,4 +28,6 @@ ClassLoader::addClasses(array
 
 	// Classes
 	'HeimrichHannot\Versions\Automator'    => 'system/modules/versions/classes/Automator.php',
+	'HeimrichHannot\Versions\Version'      => 'system/modules/versions/classes/Version.php',
+	'HeimrichHannot\Versions\VersionUser'  => 'system/modules/versions/classes/VersionUser.php',
 ));

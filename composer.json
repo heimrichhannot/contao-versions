@@ -1,6 +1,6 @@
 {
     "name": "heimrichhannot/contao-versions",
-    "description":"Extend the contao version entity.",
+    "description":"Create versions within contao with ease and prevent entities from being purged by fromTable name.",
     "keywords":["contao", "versions"],
     "type": "contao-module",
     "homepage":"https://github.com/heimrichhannot/contao-versions",
@@ -18,7 +18,8 @@
     },
     "require": {
         "contao/core": ">=3.2,<4-dev",
-        "contao-community-alliance/composer-installer": "*"
+        "contao-community-alliance/composer-installer": "*",
+        "heimrichhannot/contao-haste_plus": "~1.0"
     },
     "autoload": {
         "classmap": [""]
