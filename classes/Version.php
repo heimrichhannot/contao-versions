@@ -84,9 +84,7 @@ class Version
 	 */
 	public static function createVersion(\Contao\Versions $objVersion, \Contao\Model $objModel)
 	{
-		$objVersionCheck = VersionModel::findCurrentByModel($objModel);
-
-		$objVersionCheck === null ? $objVersion->create() : $objVersion->initialize();
+		$objVersion->create();
 
 		$dc = DC_Table::getInstanceFromModel($objModel);
 
