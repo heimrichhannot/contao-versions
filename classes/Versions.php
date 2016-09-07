@@ -454,11 +454,11 @@ class Versions extends \Controller
 						// Convert binary UUIDs to their hex equivalents (see #6365)
 						if ($blnIsBinary && \Validator::isBinaryUuid($to[$k]))
 						{
-							$to[$k] = \StringUtil::binToUuid($to[$k]);
+							$to[$k] = class_exists('Contao\StringUtil') ? \StringUtil::binToUuid($to[$k]) : \String::binToUuid($to[$k]);
 						}
 						if ($blnIsBinary && \Validator::isBinaryUuid($from[$k]))
 						{
-							$to[$k] = \StringUtil::binToUuid($from[$k]);
+							$to[$k] = class_exists('Contao\StringUtil') ? \StringUtil::binToUuid($from[$k]) : \String::binToUuid($from[$k]);
 						}
 
 						// Convert date fields
@@ -610,8 +610,8 @@ class Versions extends \Controller
 			$arrRow['from'] = max(($objVersions->version - 1), 1); // see #4828
 			$arrRow['to'] = $objVersions->version;
 			$arrRow['date'] = date(\Config::get('datimFormat'), $objVersions->tstamp);
-			$arrRow['description'] = \StringUtil::substr($arrRow['description'], 32);
-			$arrRow['shortTable'] = \StringUtil::substr($arrRow['fromTable'], 18); // see #5769
+			$arrRow['description'] = class_exists('Contao\StringUtil') ? \StringUtil::substr($arrRow['description'], 32) : \String::substr($arrRow['description'], 32);
+			$arrRow['shortTable'] = class_exists('Contao\StringUtil') ? \StringUtil::substr($arrRow['fromTable'], 18) : \String::substr($arrRow['fromTable'], 18); // see #5769
 
 			if ($arrRow['editUrl'] != '')
 			{
@@ -735,13 +735,13 @@ class Versions extends \Controller
 	{
 		if (!is_array($var))
 		{
-			return $binary ? \StringUtil::binToUuid($var) : $var;
+			return $binary ? (class_exists('Contao\StringUtil') ? \StringUtil::binToUuid($var) : \String::binToUuid($var)) : $var;
 		}
 		elseif (!is_array(current($var)))
 		{
 			if ($binary)
 			{
-				$var = array_map(function ($v) { return $v ? \StringUtil::binToUuid($v) : ''; }, $var);
+				$var = array_map(function ($v) { return $v ? (class_exists('Contao\StringUtil') ? \StringUtil::binToUuid($v) : \String::binToUuid($v)) : ''; }, $var);
 			}
 
 			return implode(', ', $var);
