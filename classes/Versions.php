@@ -10,8 +10,6 @@
 
 namespace Contao;
 
-use HeimrichHannot\Versions\Automator;
-
 
 /**
  * Overrides contaos Versions class in order to make it usable in frontend as well
@@ -152,7 +150,7 @@ class Versions extends \Controller
 		}
 
 		// clean up only non persistent entities
-		Automator::cleanVersionTable();
+		\HeimrichHannot\Versions\Automator::cleanVersionTable();
 
 		// Get the new record
 		$objRecord = $this->Database->prepare("SELECT * FROM " . $this->strTable . " WHERE id=?")
