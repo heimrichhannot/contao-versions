@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.0.9] - 2017-01-09
+
+### Fixed
+- missing user issues
+
 ## [1.0.8] - 2016-12-16
 
 ### Fixed

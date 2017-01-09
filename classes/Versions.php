@@ -10,6 +10,8 @@
 
 namespace Contao;
 
+use HeimrichHannot\Versions\VersionUser;
+
 
 /**
  * Overrides contaos Versions class in order to make it usable in frontend as well
@@ -245,7 +247,7 @@ class Versions extends \Controller
 			}
 		}
 
-		$this->log('Version '.$intVersion.' of record "'.$this->strTable.'.id='.$this->intPid.'" has been created'.$this->getParentEntries($this->strTable, $this->intPid), __METHOD__, TL_GENERAL);
+		$this->log('Version '.$intVersion.' of record "'.$this->strTable.'.id='.$this->intPid.'" has been created'.($GLOBALS['TL_DCA'][$this->strTable]['config']['ptable'] ? $this->getParentEntries($this->strTable, $this->intPid) : ''), __METHOD__, TL_GENERAL);
 	}
 
 
@@ -720,7 +722,7 @@ class Versions extends \Controller
 
 		$this->import('BackendUser', 'User');
 
-		return $this->User->username;
+		return $this->User->username ?: VersionUser::VERSION_USER_NAME;
 	}
 
 
@@ -738,7 +740,7 @@ class Versions extends \Controller
 
 		$this->import('BackendUser', 'User');
 
-		return $this->User->id;
+		return $this->User->id ?: VersionUser::getInstance()->id;
 	}
 
 
