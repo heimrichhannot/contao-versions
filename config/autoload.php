@@ -12,17 +12,17 @@
 /**
  * Register the namespaces
  */
-ClassLoader::addNamespaces(array
-(
-	'HeimrichHannot',
-));
+ClassLoader::addNamespaces(
+    [
+	'HeimrichHannot',]
+);
 
 
 /**
  * Register the classes
  */
-ClassLoader::addClasses(array
-(
+ClassLoader::addClasses(
+    [
 	// Model
 	'HeimrichHannot\Versions\VersionModel' => 'system/modules/versions/model/VersionModel.php',
 
@@ -30,5 +30,5 @@ ClassLoader::addClasses(array
 	'HeimrichHannot\Versions\Automator'    => 'system/modules/versions/classes/Automator.php',
 	'Contao\Versions'                      => 'system/modules/versions/classes/Versions.php',
 	'HeimrichHannot\Versions\Version'      => 'system/modules/versions/classes/Version.php',
-	'HeimrichHannot\Versions\VersionUser'  => 'system/modules/versions/classes/VersionUser.php',
-));
+	'HeimrichHannot\Versions\VersionUser'  => 'system/modules/versions/classes/VersionUser.php',]
+);

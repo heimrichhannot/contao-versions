@@ -11,20 +11,20 @@
 
 $arrDca = &$GLOBALS['TL_DCA']['tl_version'];
 
-$arrFields = array(
-    'memberusername'         => array(
+$arrFields = [
+    'memberusername'         => [
         'label' => &$GLOBALS['TL_LANG']['tl_version']['memberusername'],
         'sql'   => "varchar(255) NULL"
-    ),
-    'memberid'               => array(
+    ],
+    'memberid'               => [
         'label' => &$GLOBALS['TL_LANG']['tl_version']['memberid'],
         'sql' => "int(10) unsigned NULL"
-    ),
-    'formhybrid_backend_url' => array(
+    ],
+    'formhybrid_backend_url' => [
         'label' => &$GLOBALS['TL_LANG']['tl_version']['formhybrid_backend_url'],
         'sql' => "varchar(255) NULL"
-    )
-);
+    ]
+];
 
 $arrDca['fields'] = array_merge($arrFields, $arrDca['fields']);
 
@@ -33,7 +33,7 @@ tl_version_versions::modifyExistingFields($arrDca);
 class tl_version_versions {
     public static function modifyExistingFields(&$arrDca)
     {
-        foreach (array('version', 'fromTable', 'userid', 'username', 'description', 'editUrl', 'active', 'data') as $strField)
+        foreach (['version', 'fromTable', 'userid', 'username', 'description', 'editUrl', 'active', 'data'] as $strField)
         {
             $arrDca['fields'][$strField]['label'] = &$GLOBALS['TL_LANG']['tl_version'][$strField];
         }

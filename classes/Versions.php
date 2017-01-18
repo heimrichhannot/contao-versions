@@ -357,7 +357,7 @@ class Versions extends \Controller
 	public function compare()
 	{
 		$strBuffer = '';
-		$arrVersions = array();
+		$arrVersions = [];
 		$intTo = 0;
 		$intFrom = 0;
 
@@ -371,7 +371,7 @@ class Versions extends \Controller
 		else
 		{
 			$intIndex = 0;
-			$from = array();
+			$from = [];
 
 			// Store the versions and mark the active one
 			while ($objVersions->next())
@@ -503,7 +503,9 @@ class Versions extends \Controller
 						}
 
 						$objDiff = new \Diff($from[$k], $to[$k]);
-						$strBuffer .= $objDiff->render(new DiffRenderer(array('field'=>($GLOBALS['TL_DCA'][$this->strTable]['fields'][$k]['label'][0] ?: (isset($GLOBALS['TL_LANG']['MSC'][$k]) ? (is_array($GLOBALS['TL_LANG']['MSC'][$k]) ? $GLOBALS['TL_LANG']['MSC'][$k][0] : $GLOBALS['TL_LANG']['MSC'][$k]) : $k)))));
+						$strBuffer .= $objDiff->render(new DiffRenderer(
+                                                           ['field' =>($GLOBALS['TL_DCA'][$this->strTable]['fields'][$k]['label'][0] ?: (isset($GLOBALS['TL_LANG']['MSC'][$k]) ? (is_array($GLOBALS['TL_LANG']['MSC'][$k]) ? $GLOBALS['TL_LANG']['MSC'][$k][0] : $GLOBALS['TL_LANG']['MSC'][$k]) : $k))]
+                                                       ));
 					}
 				}
 			}
@@ -587,7 +589,7 @@ class Versions extends \Controller
 	 */
 	public static function addToTemplate(\BackendTemplate $objTemplate)
 	{
-		$arrVersions = array();
+		$arrVersions = [];
 
 		$objUser = \BackendUser::getInstance();
 		$objDatabase = \Database::getInstance();
@@ -689,8 +691,8 @@ class Versions extends \Controller
 		{
 			$strUrl = preg_replace
 			(
-				array('/&(amp;)?id=[^&]+/', '/(&(amp;)?)t(id=[^&]+)/', '/(&(amp;)?)state=[^&]*/'),
-				array('', '$1$3', '$1act=edit'), $strUrl
+                ['/&(amp;)?id=[^&]+/', '/(&(amp;)?)t(id=[^&]+)/', '/(&(amp;)?)state=[^&]*/'],
+                ['', '$1$3', '$1act=edit'], $strUrl
 			);
 		}
 
