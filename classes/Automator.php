@@ -18,7 +18,7 @@ class Automator extends \Automator
      */
     public function purgeVersionTable()
     {
-        $blnPurge = static::clearVersionTable(true);
+        $blnPurge = static::cleanVersionTable(true);
 
         // Add a log entry
         if ($blnPurge)
