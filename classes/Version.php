@@ -96,7 +96,7 @@ class Version
 				if (is_array($callback))
 				{
 					$objCallback = \Controller::importStatic($callback[0]);
-					$objCallback->$callback[1]($objModel->getTable(), $objModel->id, $dc);
+					$objCallback->{$callback[1]}($objModel->getTable(), $objModel->id, $dc);
 				} elseif (is_callable($callback))
 				{
 					$callback($objModel->getTable(), $objModel->id, $dc);
