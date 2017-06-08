@@ -1,8 +1,15 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.0.14] - 2017-06-08
+
+### Removed
+- composer-installer dep
+
 ## [1.0.13] - 2017-04-12
-- created new tag
+
+### Added
+- new tag
 
 ## [1.0.12] - 2017-04-06
 
