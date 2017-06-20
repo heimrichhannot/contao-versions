@@ -1,9 +1,9 @@
 {
-    "name": "heimrichhannot/contao-versions",
-    "description":"Create versions within contao with ease and prevent entities from being purged by fromTable name.",
+    "name": "heimrichhannot/contao-versions-bundle",
+    "description":"Create versions within contao with ease and prevent entities from being purged by fromTable name. Also usable in frontend.",
     "keywords":["contao", "versions"],
     "type": "contao-module",
-    "homepage":"https://github.com/heimrichhannot/contao-versions",
+    "homepage":"https://bitbucket.com/heimrichhannot/contao-versions-bundle",
     "license":"LGPL-3.0+",
     "authors":[
         {
@@ -14,22 +14,35 @@
         }
     ],
     "support":{
-        "issues":"https://github.com/heimrichhannot/contao-versions/issues"
+        "issues":"https://bitbucket.com/heimrichhannot/contao-versions-bundle/issues"
     },
     "require": {
-        "php": "~5.4 || ~7.0",
-        "contao/core-bundle": "^3.5.1 || ~4.1",
-        "contao-community-alliance/composer-plugin": "~2.4 || ~3.0",
+        "php": ">=5.5.0",
+        "symfony/framework-bundle": "^2.8|^3.0",
+        "contao/core-bundle": "^4.4",
         "heimrichhannot/contao-haste_plus": "~1.0"
     },
+    "conflict": {
+        "contao/core": "*"
+    },
     "autoload": {
-        "classmap": [""]
+        "psr-4": {
+            "HeimrichHannot\\VersionsBundle\\": "src/"
+        },
+        "classmap": [
+            "src/Resources/contao/"
+        ],
+        "exclude-from-classmap": [
+            "src/Resources/contao/config/",
+            "src/Resources/contao/dca/",
+            "src/Resources/contao/languages/",
+            "src/Resources/contao/templates/"
+        ]
+    },
+    "config": {
+        "preferred-install": "dist"
     },
     "extra": {
-        "contao": {
-            "sources": {
-                "": "system/modules/versions"
-            }
-        }
+        "contao-manager-plugin": "HeimrichHannot\\VersionsBundle\\ContaoManager\\Plugin"
     }
 }

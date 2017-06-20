@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.0.0] - 2017-06-20
+
+### Changed
+- first version for contao 4
+
 ## [1.0.14] - 2017-06-08
 
 ### Removed
