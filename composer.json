@@ -18,7 +18,7 @@
     },
     "require": {
         "php": ">=5.5.0",
-        "symfony/framework-bundle": "^2.8|^3.0",
+        "symfony/framework-bundle": "^2.8|^3.0|^4.1",
         "contao/core-bundle": "^4.4",
         "heimrichhannot/contao-haste_plus": "~1.0"
     },
