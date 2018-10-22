@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.1.0] - 2017-10-22
+
+### Changes
+- removed Symfony dependency
+- updated php dependency
+- updated licence
+
 ## [2.0.0] - 2017-06-20
 
 ### Changed

@@ -4,7 +4,7 @@
     "keywords":["contao", "versions"],
     "type": "contao-module",
     "homepage":"https://bitbucket.com/heimrichhannot/contao-versions-bundle",
-    "license":"LGPL-3.0+",
+    "license":"LGPL-3.0-or-later",
     "authors":[
         {
             "name":"Heimrich & Hannot",
@@ -17,8 +17,7 @@
         "issues":"https://bitbucket.com/heimrichhannot/contao-versions-bundle/issues"
     },
     "require": {
-        "php": ">=5.5.0",
-        "symfony/framework-bundle": "^2.8|^3.0",
+        "php": "^5.6 || ^7.0",
         "contao/core-bundle": "^4.4",
         "heimrichhannot/contao-haste_plus": "~1.0"
     },
