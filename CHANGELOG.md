@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.2.0] - 2020-06-29
+- removed `Encryption` call -> not usable in php 7.4 anymore
+
 ## [2.1.0] - 2017-10-22
 
 ### Changes

@@ -45,7 +45,7 @@ class VersionUser
 			$objUser->username = $objUser->email = static::VERSION_USER_EMAIL;
 			$objUser->name     = static::VERSION_USER_NAME;
 			// at least something must be in there
-			$objUser->password  = \Encryption::encrypt(CodeGenerator::generate());
+			$objUser->password  = md5(rand(0, 999999999));
 			$objUser->disable   = true;
 			$objUser->dateAdded = $objUser->tstamp = time();
 			$objUser->save();
