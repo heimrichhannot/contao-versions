@@ -1,18 +1,21 @@
 <?php
 
-/**
- * Contao Open Source CMS
+/*
+ * This file is part of Contao.
  *
- * Copyright (c) 2005-2016 Leo Feyer
+ * (c) Leo Feyer
  *
- * @license LGPL-3.0+
+ * @license LGPL-3.0-or-later
  */
 
 namespace Contao;
 
 use HeimrichHannot\Versions\VersionUser;
-use Contao\CoreBundle\Exception\ResponseException;
+use Contao\Controller;
 use Contao\Database\Result;
+use Contao\CoreBundle\Exception\ResponseException;
+use Doctrine\DBAL\Types\BinaryType;
+use Doctrine\DBAL\Types\BlobType;
 
 
 /**
@@ -20,69 +23,60 @@ use Contao\Database\Result;
  *
  * @author Leo Feyer <https://github.com/leofeyer>
  */
-class Versions extends \Controller
+class Versions extends Controller
 {
-
     /**
      * Table
-     *
      * @var string
      */
     protected $strTable;
 
     /**
      * Parent ID
-     *
      * @var integer
      */
     protected $intPid;
 
     /**
      * Edit URL
-     *
      * @var string
      */
     protected $strEditUrl;
 
     /**
      * Username
-     *
      * @var string
      */
     protected $strUsername;
 
     /**
      * User ID
-     *
      * @var integer
      */
     protected $intUserId;
 
-
     /**
      * Initialize the object
      *
-     * @param string  $strTable
+     * @param string $strTable
      * @param integer $intPid
      *
      * @throws \InvalidArgumentException
      */
     public function __construct($strTable, $intPid)
     {
-        $this->import('Database');
+        $this->import(Database::class, 'Database');
         parent::__construct();
 
         $this->loadDataContainer($strTable);
 
-        if (!isset($GLOBALS['TL_DCA'][$strTable]))
-        {
+        if (!isset($GLOBALS['TL_DCA'][$strTable])) {
             throw new \InvalidArgumentException(sprintf('"%s" is not a valid table', StringUtil::specialchars($strTable)));
         }
 
         $this->strTable = $strTable;
-        $this->intPid   = (int) $intPid;
+        $this->intPid   = (int)$intPid;
     }
-
 
     /**
      * Set the edit URL
@@ -94,7 +88,6 @@ class Versions extends \Controller
         $this->strEditUrl = $strEditUrl;
     }
 
-
     /**
      * Set the username
      *
@@ -104,7 +97,6 @@ class Versions extends \Controller
     {
         $this->strUsername = $strUsername;
     }
-
 
     /**
      * Set the user ID
@@ -116,7 +108,6 @@ class Versions extends \Controller
         $this->intUserId = $intUserId;
     }
 
-
     /**
      * Returns the latest version
      *
@@ -124,51 +115,45 @@ class Versions extends \Controller
      */
     public function getLatestVersion()
     {
-        if (!$GLOBALS['TL_DCA'][$this->strTable]['config']['enableVersioning'])
-        {
+        if (!$GLOBALS['TL_DCA'][$this->strTable]['config']['enableVersioning']) {
             return null;
         }
 
-        $objVersion = $this->Database->prepare("SELECT MAX(version) AS version FROM tl_version WHERE fromTable=? AND pid=?")->limit(1)->execute(
-                $this->strTable,
-                $this->intPid
-            );
+        $objVersion = $this->Database->prepare("SELECT MAX(version) AS version FROM tl_version WHERE fromTable=? AND pid=?")
+            ->limit(1)
+            ->execute($this->strTable, $this->intPid);
 
-        return (int) $objVersion->version;
+        return (int)$objVersion->version;
     }
-
 
     /**
      * Create the initial version of a record
      */
     public function initialize()
     {
-        if (!$GLOBALS['TL_DCA'][$this->strTable]['config']['enableVersioning'])
-        {
+        if (!$GLOBALS['TL_DCA'][$this->strTable]['config']['enableVersioning']) {
             return;
         }
 
-        $objVersion = $this->Database->prepare("SELECT COUNT(*) AS count FROM tl_version WHERE fromTable=? AND pid=?")->limit(1)->execute(
-            $this->strTable,
-            $this->intPid
-        );
+        $objVersion = $this->Database->prepare("SELECT COUNT(*) AS count FROM tl_version WHERE fromTable=? AND pid=?")
+            ->limit(1)
+            ->execute($this->strTable, $this->intPid);
 
-        if ($objVersion->count > 0)
-        {
+        if ($objVersion->count > 0) {
             return;
         }
 
-        $this->create();
+        $this->create(true);
     }
-
 
     /**
      * Create a new version of a record
+     *
+     * @param boolean $blnHideUser
      */
-    public function create()
+    public function create($blnHideUser = false)
     {
-        if (!$GLOBALS['TL_DCA'][$this->strTable]['config']['enableVersioning'])
-        {
+        if (!$GLOBALS['TL_DCA'][$this->strTable]['config']['enableVersioning']) {
             return;
         }
 
@@ -176,28 +161,24 @@ class Versions extends \Controller
         \HeimrichHannot\Versions\Automator::cleanVersionTable();
 
         // Get the new record
-        $objRecord = $this->Database->prepare("SELECT * FROM " . $this->strTable . " WHERE id=?")->limit(1)->execute($this->intPid);
+        $objRecord = $this->Database->prepare("SELECT * FROM " . $this->strTable . " WHERE id=?")
+            ->limit(1)
+            ->execute($this->intPid);
 
-        if ($objRecord->numRows < 1 || $objRecord->tstamp < 1)
-        {
+        if ($objRecord->numRows < 1 || $objRecord->tstamp < 1) {
             return;
         }
 
         // Store the content if it is an editable file
-        if ($this->strTable == 'tl_files')
-        {
+        if ($this->strTable == 'tl_files') {
             $objModel = \FilesModel::findByPk($this->intPid);
 
-            if ($objModel !== null && in_array($objModel->extension, \StringUtil::trimsplit(',', strtolower(\Config::get('editableFiles')))))
-            {
+            if ($objModel !== null && in_array($objModel->extension, \StringUtil::trimsplit(',', strtolower(\Config::get('editableFiles'))))) {
                 $objFile = new \File($objModel->path);
 
-                if ($objFile->extension == 'svgz')
-                {
+                if ($objFile->extension == 'svgz') {
                     $objRecord->content = gzdecode($objFile->getContent());
-                }
-                else
-                {
+                } else {
                     $objRecord->content = $objFile->getContent();
                 }
             }
@@ -210,44 +191,29 @@ class Versions extends \Controller
             $this->strTable
         );
 
-        if ($objVersion->version !== null)
-        {
+        if ($objVersion->version !== null) {
             $intVersion = $objVersion->version + 1;
         }
 
         $strDescription = '';
 
-        if (!empty($objRecord->title))
-        {
+        if (!empty($objRecord->title)) {
             $strDescription = $objRecord->title;
-        }
-        elseif (!empty($objRecord->name))
-        {
+        } elseif (!empty($objRecord->name)) {
             $strDescription = $objRecord->name;
-        }
-        elseif (!empty($objRecord->firstname))
-        {
+        } elseif (!empty($objRecord->firstname)) {
             $strDescription = $objRecord->firstname . ' ' . $objRecord->lastname;
-        }
-        elseif (!empty($objRecord->headline))
-        {
+        } elseif (!empty($objRecord->headline)) {
             $chunks = \StringUtil::deserialize($objRecord->headline);
 
-            if (is_array($chunks) && isset($chunks['value']))
-            {
+            if (\is_array($chunks) && isset($chunks['value'])) {
                 $strDescription = $chunks['value'];
-            }
-            else
-            {
+            } else {
                 $strDescription = $objRecord->headline;
             }
-        }
-        elseif (!empty($objRecord->selector))
-        {
+        } elseif (!empty($objRecord->selector)) {
             $strDescription = $objRecord->selector;
-        }
-        elseif (!empty($objRecord->subject))
-        {
+        } elseif (!empty($objRecord->subject)) {
             $strDescription = $objRecord->subject;
         }
 
@@ -271,17 +237,12 @@ class Versions extends \Controller
         );
 
         // Trigger the oncreate_version_callback
-        if (is_array($GLOBALS['TL_DCA'][$this->strTable]['config']['oncreate_version_callback']))
-        {
-            foreach ($GLOBALS['TL_DCA'][$this->strTable]['config']['oncreate_version_callback'] as $callback)
-            {
-                if (is_array($callback))
-                {
+        if (\is_array($GLOBALS['TL_DCA'][$this->strTable]['config']['oncreate_version_callback'])) {
+            foreach ($GLOBALS['TL_DCA'][$this->strTable]['config']['oncreate_version_callback'] as $callback) {
+                if (\is_array($callback)) {
                     $this->import($callback[0]);
                     $this->{$callback[0]}->{$callback[1]}($this->strTable, $this->intPid, $intVersion, $objRecord->row());
-                }
-                elseif (is_callable($callback))
-                {
+                } elseif (\is_callable($callback)) {
                     $callback($this->strTable, $this->intPid, $intVersion, $objRecord->row());
                 }
             }
@@ -295,7 +256,6 @@ class Versions extends \Controller
         );
     }
 
-
     /**
      * Restore a version
      *
@@ -303,44 +263,34 @@ class Versions extends \Controller
      */
     public function restore($intVersion)
     {
-        if (!$GLOBALS['TL_DCA'][$this->strTable]['config']['enableVersioning'])
-        {
+        if (!$GLOBALS['TL_DCA'][$this->strTable]['config']['enableVersioning']) {
             return;
         }
 
-        $objData = $this->Database->prepare("SELECT * FROM tl_version WHERE fromTable=? AND pid=? AND version=?")->limit(1)->execute(
-            $this->strTable,
-            $this->intPid,
-            $intVersion
-        );
+        $objData = $this->Database->prepare("SELECT * FROM tl_version WHERE fromTable=? AND pid=? AND version=?")
+            ->limit(1)
+            ->execute($this->strTable, $this->intPid, $intVersion);
 
-        if ($objData->numRows < 1)
-        {
+        if ($objData->numRows < 1) {
             return;
         }
 
-        $data = \StringUtil::deserialize($objData->data);
+        $data = StringUtil::deserialize($objData->data);
 
-        if (!is_array($data))
-        {
+        if (!\is_array($data)) {
             return;
         }
 
         // Restore the content if it is an editable file
-        if ($this->strTable == 'tl_files')
-        {
+        if ($this->strTable == 'tl_files') {
             $objModel = \FilesModel::findByPk($this->intPid);
 
-            if ($objModel !== null && in_array($objModel->extension, \StringUtil::trimsplit(',', strtolower(\Config::get('editableFiles')))))
-            {
+            if ($objModel !== null && in_array($objModel->extension, \StringUtil::trimsplit(',', strtolower(\Config::get('editableFiles'))))) {
                 $objFile = new \File($objModel->path);
 
-                if ($objFile->extension == 'svgz')
-                {
+                if ($objFile->extension == 'svgz') {
                     $objFile->write(gzencode($data['content']));
-                }
-                else
-                {
+                } else {
                     $objFile->write($data['content']);
                 }
 
@@ -355,70 +305,46 @@ class Versions extends \Controller
         $data = array_intersect_key($data, $arrFields);
 
         // Reset fields added after storing the version to their default value (see #7755)
-        foreach (array_diff_key($arrFields, $data) as $k => $v)
-        {
-            $data[$k] = \Widget::getEmptyValueByFieldType($GLOBALS['TL_DCA'][$this->strTable]['fields'][$k]['sql']);
+        foreach (array_diff_key($arrFields, $data) as $k => $v) {
+            $data[$k] = Widget::getEmptyValueByFieldType($GLOBALS['TL_DCA'][$this->strTable]['fields'][$k]['sql']);
         }
 
         $this->Database->prepare("UPDATE " . $this->strTable . " %s WHERE id=?")->set($data)->execute($this->intPid);
 
-        $this->Database->prepare("UPDATE tl_version SET active='' WHERE fromTable=? AND pid=?")->execute($this->strTable, $this->intPid);
+        $this->Database->prepare("UPDATE tl_version SET active='' WHERE fromTable=? AND pid=?")
+            ->execute($this->strTable, $this->intPid);
 
-        $this->Database->prepare("UPDATE tl_version SET active=1 WHERE fromTable=? AND pid=? AND version=?")->execute(
-            $this->strTable,
-            $this->intPid,
-            $intVersion
-        );
+        $this->Database->prepare("UPDATE tl_version SET active=1 WHERE fromTable=? AND pid=? AND version=?")
+            ->execute($this->strTable, $this->intPid, $intVersion);
 
         // Trigger the onrestore_version_callback
-        if (is_array($GLOBALS['TL_DCA'][$this->strTable]['config']['onrestore_version_callback']))
-        {
-            foreach ($GLOBALS['TL_DCA'][$this->strTable]['config']['onrestore_version_callback'] as $callback)
-            {
-                if (is_array($callback))
-                {
+        if (\is_array($GLOBALS['TL_DCA'][$this->strTable]['config']['onrestore_version_callback'])) {
+            foreach ($GLOBALS['TL_DCA'][$this->strTable]['config']['onrestore_version_callback'] as $callback) {
+                if (\is_array($callback)) {
                     $this->import($callback[0]);
                     $this->{$callback[0]}->{$callback[1]}($this->strTable, $this->intPid, $intVersion, $data);
-                }
-                elseif (is_callable($callback))
-                {
+                } elseif (\is_callable($callback)) {
                     $callback($this->strTable, $this->intPid, $intVersion, $data);
                 }
             }
         }
 
         // Trigger the deprecated onrestore_callback
-        if (is_array($GLOBALS['TL_DCA'][$this->strTable]['config']['onrestore_callback']))
-        {
-            @trigger_error(
-                'Using the onrestore_callback has been deprecated and will no longer work in Contao 5.0. Use the onrestore_version_callback instead.',
-                E_USER_DEPRECATED
-            );
+        if (\is_array($GLOBALS['TL_DCA'][$this->strTable]['config']['onrestore_callback'])) {
+            @trigger_error('Using the "onrestore_callback" has been deprecated and will no longer work in Contao 5.0. Use the "onrestore_version_callback" instead.', E_USER_DEPRECATED);
 
-            foreach ($GLOBALS['TL_DCA'][$this->strTable]['config']['onrestore_callback'] as $callback)
-            {
-                if (is_array($callback))
-                {
+            foreach ($GLOBALS['TL_DCA'][$this->strTable]['config']['onrestore_callback'] as $callback) {
+                if (\is_array($callback)) {
                     $this->import($callback[0]);
                     $this->{$callback[0]}->{$callback[1]}($this->intPid, $this->strTable, $data, $intVersion);
-                }
-                elseif (is_callable($callback))
-                {
+                } elseif (\is_callable($callback)) {
                     $callback($this->intPid, $this->strTable, $data, $intVersion);
                 }
             }
         }
 
-        $this->log(
-            'Version ' . $intVersion . ' of record "' . $this->strTable . '.id=' . $this->intPid . '" has been restored' . $this->getParentEntries(
-                $this->strTable,
-                $this->intPid
-            ),
-            __METHOD__,
-            TL_GENERAL
-        );
+        $this->log('Version ' . $intVersion . ' of record "' . $this->strTable . '.id=' . $this->intPid . '" has been restored' . $this->getParentEntries($this->strTable, $this->intPid), __METHOD__, TL_GENERAL);
     }
-
 
     /**
      * Compare versions
@@ -436,153 +362,117 @@ class Versions extends \Controller
         $intTo       = 0;
         $intFrom     = 0;
 
-        /** @var Result|object $objVersions */
-        $objVersions = $this->Database->prepare("SELECT * FROM tl_version WHERE pid=? AND fromTable=? ORDER BY version DESC")->execute(
-                $this->intPid,
-                $this->strTable
-            );
+        $objVersions = $this->Database->prepare("SELECT * FROM tl_version WHERE pid=? AND fromTable=? ORDER BY version DESC")
+            ->execute($this->intPid, $this->strTable);
 
-        if ($objVersions->numRows < 2)
-        {
+        if ($objVersions->numRows < 2) {
             $strBuffer = '<p>There are no versions of ' . $this->strTable . '.id=' . $this->intPid . '</p>';
-        }
-        else
-        {
+        } else {
             $intIndex = 0;
             $from     = [];
 
             // Store the versions and mark the active one
-            while ($objVersions->next())
-            {
-                if ($objVersions->active)
-                {
+            while ($objVersions->next()) {
+                if ($objVersions->active) {
                     $intIndex = $objVersions->version;
                 }
 
                 $arrVersions[$objVersions->version]         = $objVersions->row();
-                $arrVersions[$objVersions->version]['info'] =
-                    $GLOBALS['TL_LANG']['MSC']['version'] . ' ' . $objVersions->version . ' (' . \Date::parse(
-                        \Config::get('datimFormat'),
-                        $objVersions->tstamp
-                    ) . ') ' . $objVersions->username;
+                $arrVersions[$objVersions->version]['info'] = $GLOBALS['TL_LANG']['MSC']['version'] . ' ' . $objVersions->version . ' (' . Date::parse(Config::get('datimFormat'), $objVersions->tstamp) . ') ' . $objVersions->username;
             }
 
             // To
-            if (\Input::post('to') && isset($arrVersions[\Input::post('to')]))
-            {
-                $intTo = \Input::post('to');
-                $to    = \StringUtil::deserialize($arrVersions[\Input::post('to')]['data']);
-            }
-            elseif (\Input::get('to') && isset($arrVersions[\Input::get('to')]))
-            {
-                $intTo = \Input::get('to');
-                $to    = \StringUtil::deserialize($arrVersions[\Input::get('to')]['data']);
-            }
-            else
-            {
+            if (Input::post('to') && isset($arrVersions[Input::post('to')])) {
+                $intTo = Input::post('to');
+                $to    = StringUtil::deserialize($arrVersions[Input::post('to')]['data']);
+            } elseif (Input::get('to') && isset($arrVersions[Input::get('to')])) {
+                $intTo = Input::get('to');
+                $to    = StringUtil::deserialize($arrVersions[Input::get('to')]['data']);
+            } else {
                 $intTo = $intIndex;
-                $to    = \StringUtil::deserialize($arrVersions[$intTo]['data']);
+                $to    = StringUtil::deserialize($arrVersions[$intTo]['data']);
             }
 
             // From
-            if (\Input::post('from') && isset($arrVersions[\Input::post('from')]))
-            {
-                $intFrom = \Input::post('from');
-                $from    = \StringUtil::deserialize($arrVersions[\Input::post('from')]['data']);
-            }
-            elseif (\Input::get('from') && isset($arrVersions[\Input::get('from')]))
-            {
-                $intFrom = \Input::get('from');
-                $from    = \StringUtil::deserialize($arrVersions[\Input::get('from')]['data']);
-            }
-            elseif ($objVersions->numRows > $intIndex)
-            {
+            if (Input::post('from') && isset($arrVersions[Input::post('from')])) {
+                $intFrom = Input::post('from');
+                $from    = StringUtil::deserialize($arrVersions[Input::post('from')]['data']);
+            } elseif (Input::get('from') && isset($arrVersions[Input::get('from')])) {
+                $intFrom = Input::get('from');
+                $from    = StringUtil::deserialize($arrVersions[Input::get('from')]['data']);
+            } elseif ($objVersions->numRows > $intIndex) {
                 $intFrom = $objVersions->first()->version;
-                $from    = \StringUtil::deserialize($arrVersions[$intFrom]['data']);
-            }
-            elseif ($intIndex > 1)
-            {
+                $from    = StringUtil::deserialize($arrVersions[$intFrom]['data']);
+            } elseif ($intIndex > 1) {
                 $intFrom = $intIndex - 1;
-                $from    = \StringUtil::deserialize($arrVersions[$intFrom]['data']);
+                $from    = StringUtil::deserialize($arrVersions[$intFrom]['data']);
             }
 
             // Only continue if both version numbers are set
-            if ($intTo > 0 && $intFrom > 0)
-            {
-                \System::loadLanguageFile($this->strTable);
+            if ($intTo > 0 && $intFrom > 0) {
+                System::loadLanguageFile($this->strTable);
 
                 // Get the order fields
-                $objDcaExtractor = \DcaExtractor::getInstance($this->strTable);
+                $objDcaExtractor = DcaExtractor::getInstance($this->strTable);
                 $arrOrder        = $objDcaExtractor->getOrderFields();
 
                 // Find the changed fields and highlight the changes
-                foreach ($to as $k => $v)
-                {
-                    if ($from[$k] != $to[$k])
-                    {
+                foreach ($to as $k => $v) {
+                    if ($from[$k] != $to[$k]) {
                         if ($GLOBALS['TL_DCA'][$this->strTable]['fields'][$k]['inputType'] == 'password'
                             || $GLOBALS['TL_DCA'][$this->strTable]['fields'][$k]['eval']['doNotShow']
                             || $GLOBALS['TL_DCA'][$this->strTable]['fields'][$k]['eval']['hideInput']
-                        )
-                        {
+                        ) {
                             continue;
                         }
 
                         $blnIsBinary = ($GLOBALS['TL_DCA'][$this->strTable]['fields'][$k]['inputType'] == 'fileTree' || in_array($k, $arrOrder));
 
                         // Decrypt the values
-                        if ($GLOBALS['TL_DCA'][$this->strTable]['fields'][$k]['eval']['encrypt'])
-                        {
-                            $to[$k]   = \Encryption::decrypt($to[$k]);
-                            $from[$k] = \Encryption::decrypt($from[$k]);
+                        if ($GLOBALS['TL_DCA'][$this->strTable]['fields'][$k]['eval']['encrypt']) {
+                            $to[$k]   = Encryption::decrypt($to[$k]);
+                            $from[$k] = Encryption::decrypt($from[$k]);
                         }
 
                         // Convert serialized arrays into strings
-                        if (is_array(($tmp = \StringUtil::deserialize($to[$k]))) && !is_array($to[$k]))
-                        {
+                        if (is_array(($tmp = \StringUtil::deserialize($to[$k]))) && !is_array($to[$k])) {
                             $to[$k] = $this->implodeRecursive($tmp, $blnIsBinary);
                         }
-                        if (is_array(($tmp = \StringUtil::deserialize($from[$k]))) && !is_array($from[$k]))
-                        {
+                        if (is_array(($tmp = \StringUtil::deserialize($from[$k]))) && !is_array($from[$k])) {
                             $from[$k] = $this->implodeRecursive($tmp, $blnIsBinary);
                         }
 
                         unset($tmp);
 
                         // Convert binary UUIDs to their hex equivalents (see #6365)
-                        if ($blnIsBinary && \Validator::isBinaryUuid($to[$k]))
-                        {
-                            $to[$k] = \StringUtil::binToUuid($to[$k]);
-                        }
-                        if ($blnIsBinary && \Validator::isBinaryUuid($from[$k]))
-                        {
-                            $to[$k] = \StringUtil::binToUuid($from[$k]);
+                        if ($blnIsBinary) {
+                            if (Validator::isBinaryUuid($to[$k])) {
+                                $to[$k] = StringUtil::binToUuid($to[$k]);
+                            }
+
+                            if (Validator::isBinaryUuid($from[$k])) {
+                                $from[$k] = StringUtil::binToUuid($from[$k]);
+                            }
                         }
 
                         // Convert date fields
-                        if ($GLOBALS['TL_DCA'][$this->strTable]['fields'][$k]['eval']['rgxp'] == 'date')
-                        {
-                            $to[$k]   = \Date::parse(\Config::get('dateFormat'), $to[$k] ?: '');
-                            $from[$k] = \Date::parse(\Config::get('dateFormat'), $from[$k] ?: '');
-                        }
-                        elseif ($GLOBALS['TL_DCA'][$this->strTable]['fields'][$k]['eval']['rgxp'] == 'time')
-                        {
-                            $to[$k]   = \Date::parse(\Config::get('timeFormat'), $to[$k] ?: '');
-                            $from[$k] = \Date::parse(\Config::get('timeFormat'), $from[$k] ?: '');
-                        }
-                        elseif ($GLOBALS['TL_DCA'][$this->strTable]['fields'][$k]['eval']['rgxp'] == 'datim' || $k == 'tstamp')
-                        {
+                        if ($GLOBALS['TL_DCA'][$this->strTable]['fields'][$k]['eval']['rgxp'] == 'date') {
+                            $to[$k]   = Date::parse(Config::get('dateFormat'), $to[$k] ?: '');
+                            $from[$k] = Date::parse(Config::get('dateFormat'), $from[$k] ?: '');
+                        } elseif ($GLOBALS['TL_DCA'][$this->strTable]['fields'][$k]['eval']['rgxp'] == 'time') {
+                            $to[$k]   = Date::parse(Config::get('timeFormat'), $to[$k] ?: '');
+                            $from[$k] = Date::parse(Config::get('timeFormat'), $from[$k] ?: '');
+                        } elseif ($GLOBALS['TL_DCA'][$this->strTable]['fields'][$k]['eval']['rgxp'] == 'datim' || $k == 'tstamp') {
                             $to[$k]   = \Date::parse(\Config::get('datimFormat'), $to[$k] ?: '');
                             $from[$k] = \Date::parse(\Config::get('datimFormat'), $from[$k] ?: '');
                         }
 
                         // Convert strings into arrays
-                        if (!is_array($to[$k]))
-                        {
+                        if (!\is_array($to[$k])) {
                             $to[$k] = explode("\n", $to[$k]);
                         }
-                        if (!is_array($from[$k]))
-                        {
+
+                        if (!\is_array($from[$k])) {
                             $from[$k] = explode("\n", $from[$k]);
                         }
 
@@ -603,35 +493,29 @@ class Versions extends \Controller
         }
 
         // Identical versions
-        if ($strBuffer == '')
-        {
+        if (!$strBuffer) {
             $strBuffer = '<p>' . $GLOBALS['TL_LANG']['MSC']['identicalVersions'] . '</p>';
         }
 
-        if ($blnReturnBuffer)
-        {
+        if ($blnReturnBuffer) {
             return $strBuffer;
         }
 
-        /** @var BackendTemplate|object $objTemplate */
-        $objTemplate = new \BackendTemplate('be_diff');
-
-        // Template variables
+        $objTemplate            = new BackendTemplate('be_diff');
         $objTemplate->content   = $strBuffer;
         $objTemplate->versions  = $arrVersions;
         $objTemplate->to        = $intTo;
         $objTemplate->from      = $intFrom;
-        $objTemplate->showLabel = \StringUtil::specialchars($GLOBALS['TL_LANG']['MSC']['showDifferences']);
-        $objTemplate->theme     = \Backend::getTheme();
-        $objTemplate->base      = \Environment::get('base');
+        $objTemplate->showLabel = StringUtil::specialchars($GLOBALS['TL_LANG']['MSC']['showDifferences']);
+        $objTemplate->theme     = Backend::getTheme();
+        $objTemplate->base      = Environment::get('base');
         $objTemplate->language  = $GLOBALS['TL_LANGUAGE'];
-        $objTemplate->title     = \StringUtil::specialchars($GLOBALS['TL_LANG']['MSC']['showDifferences']);
-        $objTemplate->charset   = \Config::get('characterSet');
+        $objTemplate->title     = StringUtil::specialchars($GLOBALS['TL_LANG']['MSC']['showDifferences']);
+        $objTemplate->charset   = Config::get('characterSet');
         $objTemplate->action    = ampersand(\Environment::get('request'));
 
         throw new ResponseException($objTemplate->getResponse());
     }
-
 
     /**
      * Render the versions dropdown menu
@@ -644,21 +528,19 @@ class Versions extends \Controller
             "SELECT tstamp, version, username, memberusername, active FROM tl_version WHERE fromTable=? AND pid=? ORDER BY version DESC"
         )->execute($this->strTable, $this->intPid);
 
-        if ($objVersion->numRows < 2)
-        {
+        if ($objVersion->numRows < 2) {
             return '';
         }
 
         $versions = '';
 
-        while ($objVersion->next())
-        {
+        while ($objVersion->next()) {
             $versions .= '
   <option value="' . $objVersion->version . '"' . ($objVersion->active ? ' selected="selected"' : '') . '>' . $GLOBALS['TL_LANG']['MSC']['version']
-                         . ' ' . $objVersion->version . ' (' . \Date::parse(\Config::get('datimFormat'), $objVersion->tstamp) . ') '
-                         . ($objVersion->memberusername ? $objVersion->memberusername
-                                                          . $GLOBALS['TL_LANG']['MSC']['formhybrid']['memberVersion'] : $objVersion->username)
-                         . '</option>';
+                . ' ' . $objVersion->version . ' (' . \Date::parse(\Config::get('datimFormat'), $objVersion->tstamp) . ') '
+                . ($objVersion->memberusername ? $objVersion->memberusername
+                    . $GLOBALS['TL_LANG']['MSC']['formhybrid']['memberVersion'] : $objVersion->username)
+                . '</option>';
         }
 
         return '
@@ -672,7 +554,7 @@ class Versions extends \Controller
 </select>
 <button type="submit" name="showVersion" id="showVersion" class="tl_submit">' . $GLOBALS['TL_LANG']['MSC']['restore'] . '</button>
 <a href="' . \Backend::addToUrl('versions=1&amp;popup=1') . '" title="' . \StringUtil::specialchars($GLOBALS['TL_LANG']['MSC']['showDifferences'])
-               . '" onclick="Backend.openModalIframe({\'title\':\'' . \StringUtil::specialchars(
+            . '" onclick="Backend.openModalIframe({\'title\':\'' . \StringUtil::specialchars(
                 str_replace("'", "\\'", sprintf($GLOBALS['TL_LANG']['MSC']['recordOfTable'], $this->intPid, $this->strTable))
             ) . '\',\'url\':this.href});return false">' . \Image::getHtml('diff.svg') . '</a>
 </div>
@@ -682,37 +564,35 @@ class Versions extends \Controller
 ';
     }
 
-
     /**
      * Add a list of versions to a template
      *
-     * @param BackendTemplate|object $objTemplate
+     * @param BackendTemplate $objTemplate
      */
     public static function addToTemplate(BackendTemplate $objTemplate)
     {
         $arrVersions = [];
 
-        $objUser     = \BackendUser::getInstance();
-        $objDatabase = \Database::getInstance();
+        $objUser     = BackendUser::getInstance();
+        $objDatabase = Database::getInstance();
 
         // Get the total number of versions
         $objTotal =
             $objDatabase->prepare("SELECT COUNT(*) AS count FROM tl_version WHERE version>1" . (!$objUser->isAdmin ? " AND userid=?" : ""))->execute(
-                    $objUser->id
-                );
+                $objUser->id
+            );
 
         $intLast   = ceil($objTotal->count / 30);
-        $intPage   = (\Input::get('vp') !== null) ? \Input::get('vp') : 1;
+        $intPage   = Input::get('vp') ?? 1;
         $intOffset = ($intPage - 1) * 30;
 
         // Validate the page number
-        if ($intPage < 1 || ($intLast > 0 && $intPage > $intLast))
-        {
+        if ($intPage < 1 || ($intLast > 0 && $intPage > $intLast)) {
             header('HTTP/1.1 404 Not Found');
         }
 
         // Create the pagination menu
-        $objPagination           = new \Pagination($objTotal->count, 30, 7, 'vp', new \BackendTemplate('be_pagination'));
+        $objPagination           = new Pagination($objTotal->count, 30, 7, 'vp', new BackendTemplate('be_pagination'));
         $objTemplate->pagination = $objPagination->generate();
 
         // Get the versions
@@ -724,19 +604,17 @@ class Versions extends \Controller
             . " ORDER BY tstamp DESC, pid, version DESC"
         )->limit(30, $intOffset)->execute($objUser->id);
 
-        while ($objVersions->next())
-        {
+        while ($objVersions->next()) {
             $arrRow = $objVersions->row();
 
             // Add some parameters
             $arrRow['from']        = max(($objVersions->version - 1), 1); // see #4828
             $arrRow['to']          = $objVersions->version;
-            $arrRow['date']        = date(\Config::get('datimFormat'), $objVersions->tstamp);
-            $arrRow['description'] = \StringUtil::substr($arrRow['description'], 32);
-            $arrRow['shortTable']  = \StringUtil::substr($arrRow['fromTable'], 18); // see #5769
+            $arrRow['date']        = date(Config::get('datimFormat'), $objVersions->tstamp);
+            $arrRow['description'] = StringUtil::substr($arrRow['description'], 32);
+            $arrRow['shortTable']  = StringUtil::substr($arrRow['fromTable'], 18); // see #5769
 
-            if ($arrRow['editUrl'] != '')
-            {
+            if ($arrRow['editUrl'] != '') {
                 $arrRow['editUrl'] = preg_replace('/&(amp;)?rt=[^&]+/', '&amp;rt=' . REQUEST_TOKEN, ampersand($arrRow['editUrl']));
             }
 
@@ -747,26 +625,23 @@ class Versions extends \Controller
         $arrVersions = array_values($arrVersions);
 
         // Add the "even" and "odd" classes
-        foreach ($arrVersions as $k => $v)
-        {
+        foreach ($arrVersions as $k => $v) {
             $arrVersions[$k]['class'] = (++$intCount % 2 == 0) ? 'even' : 'odd';
 
-            try
-            {
+            try {
                 // Mark deleted versions (see #4336)
-                $objDeleted = $objDatabase->prepare("SELECT COUNT(*) AS count FROM " . $v['fromTable'] . " WHERE id=?")->execute($v['pid']);
+                $objDeleted = $objDatabase->prepare("SELECT COUNT(*) AS count FROM " . $v['fromTable'] . " WHERE id=?")
+                    ->execute($v['pid']);
 
                 $arrVersions[$k]['deleted'] = ($objDeleted->count < 1);
-            } catch (\Exception $e)
-            {
+            } catch (\Exception $e) {
                 // Probably a disabled module
                 --$intCount;
                 unset($arrVersions[$k]);
             }
 
             // Skip deleted files (see #8480)
-            if ($v['fromTable'] == 'tl_files' && $arrVersions[$k]['deleted'])
-            {
+            if ($v['fromTable'] == 'tl_files' && $arrVersions[$k]['deleted']) {
                 --$intCount;
                 unset($arrVersions[$k]);
             }
@@ -775,7 +650,6 @@ class Versions extends \Controller
         $objTemplate->versions = $arrVersions;
     }
 
-
     /**
      * Return the edit URL
      *
@@ -783,17 +657,16 @@ class Versions extends \Controller
      */
     protected function getEditUrl()
     {
-        if ($this->strEditUrl !== null)
-        {
+        if ($this->strEditUrl !== null) {
             return sprintf($this->strEditUrl, $this->intPid);
         }
 
-        $strUrl = \Environment::get('request');
+        $strUrl = Environment::get('request');
 
         // Save the real edit URL if the visibility is toggled via Ajax
-        if (preg_match('/&(amp;)?state=/', $strUrl))
-        {
-            $strUrl = preg_replace(
+        if (preg_match('/&(amp;)?state=/', $strUrl)) {
+            $strUrl = preg_replace
+            (
                 ['/&(amp;)?id=[^&]+/', '/(&(amp;)?)t(id=[^&]+)/', '/(&(amp;)?)state=[^&]*/'],
                 ['', '$1$3', '$1act=edit'],
                 $strUrl
@@ -801,8 +674,7 @@ class Versions extends \Controller
         }
 
         // Adjust the URL of the "personal data" module (see #7987)
-        if (preg_match('/do=login(&|$)/', $strUrl))
-        {
+        if (preg_match('/do=login(&|$)/', $strUrl)) {
             $strUrl = preg_replace('/do=login(&|$)/', 'do=user$1', $strUrl);
             $strUrl .= '&amp;act=edit&amp;id=' . $this->User->id . '&amp;rt=' . REQUEST_TOKEN;
         }
@@ -813,7 +685,6 @@ class Versions extends \Controller
         return $strUrl;
     }
 
-
     /**
      * Return the username
      *
@@ -821,16 +692,14 @@ class Versions extends \Controller
      */
     protected function getUsername()
     {
-        if ($this->strUsername !== null)
-        {
+        if ($this->strUsername !== null) {
             return $this->strUsername;
         }
 
-        $this->import('BackendUser', 'User');
+        $this->import(BackendUser::class, 'User');
 
         return $this->User->username ?: VersionUser::VERSION_USER_NAME;
     }
-
 
     /**
      * Return the user ID
@@ -839,50 +708,45 @@ class Versions extends \Controller
      */
     protected function getUserId()
     {
-        if ($this->intUserId !== null)
-        {
+        if ($this->intUserId !== null) {
             return $this->intUserId;
         }
 
-        $this->import('BackendUser', 'User');
+        $this->import(BackendUser::class, 'User');
 
         return $this->User->id ?: VersionUser::getInstance()->id;
     }
 
-
     /**
      * Implode a multi-dimensional array recursively
      *
-     * @param mixed   $var
+     * @param mixed $var
      * @param boolean $binary
      *
      * @return string
      */
     protected function implodeRecursive($var, $binary = false)
     {
-        if (!is_array($var))
-        {
-            return $binary ? \StringUtil::binToUuid($var) : $var;
+        if (!\is_array($var)) {
+            return $binary && Validator::isBinaryUuid($var) ? StringUtil::binToUuid($var) : $var;
         }
-        elseif (!is_array(current($var)))
-        {
-            if ($binary)
-            {
-                $var = array_map(function ($v) { return $v ? \StringUtil::binToUuid($v) : ''; }, $var);
+
+        if (!\is_array(current($var))) {
+            if ($binary) {
+                $var = array_map(static function ($v) {
+                    return Validator::isBinaryUuid($v) ? StringUtil::binToUuid($v) : $v;
+                }, $var);
             }
 
             return implode(', ', $var);
         }
-        else
-        {
-            $buffer = '';
 
-            foreach ($var as $k => $v)
-            {
-                $buffer .= $k . ": " . $this->implodeRecursive($v) . "\n";
-            }
+        $buffer = '';
 
-            return trim($buffer);
+        foreach ($var as $k => $v) {
+            $buffer .= $k . ": " . $this->implodeRecursive($v) . "\n";
         }
+
+        return trim($buffer);
     }
 }
