@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [DEV] - 2021-06-21
+- refactored Versions class to contao 4.9 base
+- fixed Ambiguous class resolution warning
+
 ## [2.2.0] - 2020-06-29
 - removed `Encryption` call -> not usable in php 7.4 anymore
 

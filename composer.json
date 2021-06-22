@@ -2,31 +2,32 @@
     "name": "heimrichhannot/contao-versions-bundle",
     "description":"Create versions within contao with ease and prevent entities from being purged by fromTable name. Also usable in frontend.",
     "keywords":["contao", "versions"],
-    "type": "contao-module",
-    "homepage":"https://bitbucket.com/heimrichhannot/contao-versions-bundle",
+    "type": "contao-bundle",
+    "homepage":"https://github.com/heimrichhannot/contao-versions",
     "license":"LGPL-3.0-or-later",
     "authors":[
         {
             "name":"Heimrich & Hannot",
             "email":"digitales@heimrich-hannot.de",
-            "homepage":"http://www.heimrich-hannot.de",
+            "homepage":"https://www.heimrich-hannot.de",
             "role":"Developer"
         }
     ],
     "support":{
-        "issues":"https://bitbucket.com/heimrichhannot/contao-versions-bundle/issues"
+        "issues":"https://github.com/heimrichhannot/contao-versions/issues"
     },
     "require": {
-        "php": "^5.6 || ^7.0",
-        "contao/core-bundle": "^4.4",
+        "php": "^7.1",
+        "contao/core-bundle": "^4.9",
         "heimrichhannot/contao-haste_plus": "~1.0"
     },
-    "conflict": {
-        "contao/core": "*"
+    "replace": {
+        "heimrichhannot/contao-versions": "*"
     },
     "autoload": {
         "psr-4": {
-            "HeimrichHannot\\VersionsBundle\\": "src/"
+            "HeimrichHannot\\VersionsBundle\\": "src/",
+            "Contao\\": "overrides/"
         },
         "classmap": [
             "src/Resources/contao/"
