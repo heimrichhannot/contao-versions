@@ -10,7 +10,6 @@
 
 namespace Contao;
 
-use HeimrichHannot\Versions\VersionUser;
 use Contao\CoreBundle\Exception\ResponseException;
 use Doctrine\DBAL\Types\BinaryType;
 use Doctrine\DBAL\Types\BlobType;
@@ -200,8 +199,8 @@ class Versions extends Controller
         }
 
         $intId = $this->Database->prepare(
-            "INSERT INTO tl_version (pid, tstamp, version, fromTable, username, userid, memberid, memberusername, formhybrid_backend_url, description, editUrl, active, data) VALUES (?, ?, IFNULL((SELECT MAX(version) FROM (SELECT version FROM tl_version WHERE pid=? AND fromTable=?) v), 0) + 1, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)"
-        )->execute($this->intPid, time(), $this->intPid, $this->strTable, $blnHideUser ? null : $this->getUsername(), $blnHideUser ? 0 : $this->getUserId(), $this->memberid, $this->memberusername, $this->formhybrid_backend_url, $strDescription, $this->getEditUrl(), serialize($data))
+            "INSERT INTO tl_version (pid, tstamp, version, fromTable, username, userid, description, editUrl, active, data) VALUES (?, ?, IFNULL((SELECT MAX(version) FROM (SELECT version FROM tl_version WHERE pid=? AND fromTable=?) v), 0) + 1, ?, ?, ?, ?, ?, 1, ?)")
+            ->execute($this->intPid, time(), $this->intPid, $this->strTable, $this->strTable, $blnHideUser ? null : $this->getUsername(), $blnHideUser ? 0 : $this->getUserId(), $strDescription, $this->getEditUrl(), serialize($data))
             ->insertId;
 
 
@@ -584,7 +583,7 @@ class Versions extends Controller
         $objTemplate->pagination = $objPagination->generate();
 
         // Get the versions
-        $objVersions = $objDatabase->prepare("SELECT pid, tstamp, version, fromTable, username, userid, description, editUrl, active, memberusername, memberid, formhybrid_backend_url FROM tl_version WHERE editUrl IS NOT NULL" . (!$objUser->isAdmin ? " AND userid=?" : "") . " ORDER BY tstamp DESC, pid, version DESC")
+        $objVersions = $objDatabase->prepare("SELECT pid, tstamp, version, fromTable, username, userid, description, editUrl, active FROM tl_version WHERE editUrl IS NOT NULL" . (!$objUser->isAdmin ? " AND userid=?" : "") . " ORDER BY tstamp DESC, pid, version DESC")
             ->limit(30, $intOffset)
             ->execute($objUser->id);
 
@@ -692,7 +691,7 @@ class Versions extends Controller
 
         $this->import(BackendUser::class, 'User');
 
-        return $this->User->username ?: VersionUser::VERSION_USER_NAME;
+        return $this->User->username;
     }
 
     /**
@@ -708,7 +707,7 @@ class Versions extends Controller
 
         $this->import(BackendUser::class, 'User');
 
-        return $this->User->id ?: VersionUser::getInstance()->id;
+        return $this->User->id;
     }
 
     /**

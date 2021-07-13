@@ -21,7 +21,7 @@ use Psr\Log\LogLevel;
 class VersionsContainer
 {
     /** @var array */
-    protected $bundleConfig;
+    protected $bundleConfig = [];
 
     /** @var LoggerInterface */
     private $logger;
@@ -31,9 +31,9 @@ class VersionsContainer
      * @param array $bundleConfig
      * @param LoggerInterface $logger
      */
-    public function __construct(array $bundleConfig, LoggerInterface $logger)
+    public function __construct(LoggerInterface $logger)
     {
-        $this->bundleConfig = $bundleConfig;
+//        $this->bundleConfig = $bundleConfig;
         $this->logger       = $logger;
     }
 

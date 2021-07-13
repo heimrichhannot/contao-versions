@@ -13,6 +13,7 @@
  */
 
 use HeimrichHannot\VersionsBundle\DataContainer\VersionsContainer;
+use HeimrichHannot\VersionsBundle\Model\VersionModel;
 
 array_insert($GLOBALS['PERSISTENT_VERSION_TABLES'], 0, []);
 
@@ -26,4 +27,4 @@ $GLOBALS['TL_PURGE']['tables']['versions'] = [
 /**
  * Models
  */
-$GLOBALS['TL_MODELS']['tl_version'] = 'HeimrichHannot\Versions\VersionModel';
+$GLOBALS['TL_MODELS']['tl_version'] = VersionModel::class;

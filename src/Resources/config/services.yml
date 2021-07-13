@@ -5,3 +5,6 @@ services:
 
   HeimrichHannot\VersionsBundle\DataContainer\VersionsContainer:
     public: true
+
+  HeimrichHannot\VersionsBundle\Version\VersionControl:
+    public: true

@@ -27,15 +27,3 @@ $arrFields = [
 ];
 
 $arrDca['fields'] = array_merge($arrFields, $arrDca['fields']);
-
-tl_version_versions::modifyExistingFields($arrDca);
-
-class tl_version_versions {
-    public static function modifyExistingFields(&$arrDca)
-    {
-        foreach (['version', 'fromTable', 'userid', 'username', 'description', 'editUrl', 'active', 'data'] as $strField)
-        {
-            $arrDca['fields'][$strField]['label'] = &$GLOBALS['TL_LANG']['tl_version'][$strField];
-        }
-    }
-}
