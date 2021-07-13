@@ -14,6 +14,7 @@ use HeimrichHannot\Versions\VersionUser;
 use Contao\CoreBundle\Exception\ResponseException;
 use Doctrine\DBAL\Types\BinaryType;
 use Doctrine\DBAL\Types\BlobType;
+use HeimrichHannot\VersionsBundle\DataContainer\VersionsContainer;
 
 /**
  * Provide methods to handle versioning.
@@ -156,8 +157,7 @@ class Versions extends Controller
             return;
         }
 
-        // clean up only non persistent entities
-        \HeimrichHannot\Versions\Automator::cleanVersionTable();
+        System::getContainer()->get(VersionsContainer::class)->cleanTable();
 
         // Get the new record
         $objRecord = $this->Database->prepare("SELECT * FROM " . $this->strTable . " WHERE id=?")

@@ -11,13 +11,16 @@
 /**
  * Add persistent version table names
  */
+
+use HeimrichHannot\VersionsBundle\DataContainer\VersionsContainer;
+
 array_insert($GLOBALS['PERSISTENT_VERSION_TABLES'], 0, []);
 
 /**
  * Purge jobs
  */
 $GLOBALS['TL_PURGE']['tables']['versions'] = [
-    'callback' => ['HeimrichHannot\Versions\Automator', 'purgeVersionTable'],
+    'callback' => [VersionsContainer::class, 'purgeTable'],
     'affected' => ['tl_version']];
 
 /**
