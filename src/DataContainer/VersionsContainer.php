@@ -42,7 +42,9 @@ class VersionsContainer
         $objDatabase = Database::getInstance();
 
         if ($this->hasPersistentTables()) {
-            $tstamp = time() - (int)Config::get('versionPeriod');
+            // Fallback for legacy integrations
+            $period = $this->bundleConfig['persistent_version_period'] ?? (int)Config::get('versionPeriod');
+            $tstamp = $period > 0 ?  time() - (int)Config::get('versionPeriod') : 0;
             $objDatabase->query("DELETE FROM tl_version WHERE tstamp<$tstamp AND fromTable NOT IN('" . implode('\',\'', $GLOBALS['PERSISTENT_VERSION_TABLES']) . "')");
         } else {
             // Truncate the table
