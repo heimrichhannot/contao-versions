@@ -27,10 +27,11 @@ class Configuration implements ConfigurationInterface
                 ->arrayNode('persistent_tables')
                     ->scalarPrototype()->end()
                     ->info("Set table names that should be persist within tl_versions.")
-                    ->example(['tl_constent','tl_my_custom_entity'])
+                    ->example(['tl_content','tl_my_custom_entity'])
                 ->end()
                 ->integerNode('persistent_version_period')
                     ->info("Set the time period persistent table versions should be kept in version table. Set to 0 for forever.")
+                    ->example(7776000)
                 ->end()
             ->end()
         ;
