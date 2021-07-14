@@ -2,6 +2,8 @@ services:
   _defaults:
     autowire: true
     autoconfigure: true
+    bind:
+      $bundleConfig: '%huh_versions%'
 
   HeimrichHannot\VersionsBundle\DataContainer\VersionsContainer:
     public: true
