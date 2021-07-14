@@ -42,7 +42,7 @@ class VersionsContainer
         $objDatabase = Database::getInstance();
 
         if ($this->hasPersistentTables()) {
-            // Fallback for legacy integrations
+            // Fallback for legacy integrations, will be default 0 in version 3.
             $period = $this->bundleConfig['persistent_version_period'] ?? (int)Config::get('versionPeriod');
             $tstamp = $period > 0 ?  time() - (int)Config::get('versionPeriod') : 0;
             $objDatabase->query("DELETE FROM tl_version WHERE tstamp<$tstamp AND fromTable NOT IN('" . implode('\',\'', $GLOBALS['PERSISTENT_VERSION_TABLES']) . "')");

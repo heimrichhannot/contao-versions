@@ -30,6 +30,18 @@ class VersionControl
         $this->connection = $connection;
     }
 
+    /**
+     * Create a new version
+     *
+     * Options:
+     * - hideUser: (bool) Don't add user to version. Default false
+     * - additionalData: (array|null) Data that should be added to the versions entry. Provide as ['databaseFieldName' => 'value']. Default null
+     * - instance: (Versions|null) Pass a custom versions instance. Default null
+     *
+     * @param string $table
+     * @param int $id
+     * @param array $options
+     */
     public function createVersion(string $table, int $id, array $options = []): void
     {
         $defaults = [
@@ -43,7 +55,8 @@ class VersionControl
             $connection = $this->connection;
             $additionalData = $options['additionalData'];
             $GLOBALS['TL_DCA'][$table]['config']['oncreate_version_callback']['huh_versions_additional_data_'.$table.'_'.$id] =
-                function (string $table, int $pid, int $version, array $data) use ($connection, $additionalData) {
+                function (string $table, int $pid, int $version, array $data) use ($connection, $additionalData)
+                {
                     $stmt = $connection->prepare("SELECT id FROM tl_version WHERE fromTable=? AND pid=? AND version=?");
                     $stmt->execute([$table, $pid, $version]);
                     $id = $stmt->fetchColumn(0);

@@ -1,8 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [DEV] - 2021-06-21
+## [Unreleased] - 2021-06-21
+- added configuration for persistent tables and persistent tables version period
 - refactored Versions class to contao 4.9 base
+- refactored legacy classes into services
+- deprecated Version, VersionUser and VersionModel
 - fixed Ambiguous class resolution warning
 
 ## [2.2.0] - 2020-06-29

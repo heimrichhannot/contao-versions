@@ -31,6 +31,12 @@ class HeimrichHannotVersionsExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
         $container->setParameter('huh_versions', $config);
-
     }
+
+    public function getAlias()
+    {
+        return 'huh_versions';
+    }
+
+
 }

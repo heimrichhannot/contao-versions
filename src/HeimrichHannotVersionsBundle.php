@@ -12,9 +12,14 @@
 namespace HeimrichHannot\VersionsBundle;
 
 
+use HeimrichHannot\VersionsBundle\DependencyInjection\HeimrichHannotVersionsExtension;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 class HeimrichHannotVersionsBundle extends Bundle
 {
+    public function getContainerExtension()
+    {
+        return new HeimrichHannotVersionsExtension();
+    }
 
 }

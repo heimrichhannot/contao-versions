@@ -62,7 +62,7 @@ class Version
             $additionalData = [
                 'memberid' => $objMember->id,
                 'memberusername' => $objMember->username,
-                'username' => VersionUser::VERSION_USER_NAME,
+                'username' => VersionUser::VERSION_USER_EMAIL,
                 'userid' => 0,
             ];
             $backendUrl = self::generateBackendEditUrlForFrontend($objModel, $objVersion);
@@ -74,7 +74,6 @@ class Version
 	    System::getContainer()->get(VersionControl::class)->createVersion($objModel->getTable(), $objModel->id, [
 	        'additionalData' => $additionalData,
             'instance' => $objVersion,
-
         ]);
 
 		$dc = DC_Table::getInstanceFromModel($objModel);

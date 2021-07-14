@@ -1,6 +1,6 @@
 # Versions
 
-A helper module, that enhance to contao version entity.
+This bundle enhances the contao version entity with persistent tables options and helper methods.
 
 ## Features
 
