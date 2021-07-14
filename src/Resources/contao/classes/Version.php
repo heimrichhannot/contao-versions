@@ -17,7 +17,7 @@ use Contao\Model;
 use Contao\RequestToken;
 use Contao\System;
 use Contao\Versions;
-use HeimrichHannot\Haste\DC_Table;
+use HeimrichHannot\UtilsBundle\Driver\DC_Table_Utils;
 use HeimrichHannot\VersionsBundle\Version\VersionControl;
 
 /**
@@ -76,7 +76,7 @@ class Version
             'instance' => $objVersion,
         ]);
 
-		$dc = DC_Table::getInstanceFromModel($objModel);
+		$dc = DC_Table_Utils::createFromModel($objModel);
 
 		// Call the onversion_callback
 		if (is_array($GLOBALS['TL_DCA'][$objModel->getTable()]['config']['onversion_callback']))
