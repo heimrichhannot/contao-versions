@@ -32,6 +32,9 @@ class VersionsContainer
     /** @var LoggerInterface */
     private $logger;
 
+    /** @var array|null */
+    protected $persistentTables = null;
+
     /**
      * VersionsContainer constructor.
      * @param array $bundleConfig
@@ -56,7 +59,7 @@ class VersionsContainer
             // Fallback for legacy integrations, will be default 0 in version 3.
             $period = $this->bundleConfig['persistent_version_period'] ?? (int)Config::get('versionPeriod');
             $tstamp = $period > 0 ?  time() - (int)Config::get('versionPeriod') : 0;
-            $this->connection->executeQuery("DELETE FROM tl_version WHERE tstamp<$tstamp AND fromTable NOT IN('" . implode('\',\'', $GLOBALS['PERSISTENT_VERSION_TABLES']) . "')");
+            $this->connection->executeQuery("DELETE FROM tl_version WHERE tstamp<$tstamp AND fromTable NOT IN('" . implode('\',\'', $this->getPersistentTables()) . "')");
         } else {
             // Truncate the table
             // Delete old versions from the database
@@ -74,7 +77,7 @@ class VersionsContainer
     public function purgeTable(): void
     {
         if ($this->hasPersistentTables()) {
-            $this->connection->executeQuery("DELETE FROM tl_version WHERE fromTable NOT IN('" . implode('\',\'', $GLOBALS['PERSISTENT_VERSION_TABLES']) . "')");
+            $this->connection->executeQuery("DELETE FROM tl_version WHERE fromTable NOT IN('" . implode('\',\'', $this->getPersistentTables()) . "')");
 
             $this->log('Cleared non persistent entries from version table', __METHOD__, TL_CRON);
         } else {
@@ -91,11 +94,14 @@ class VersionsContainer
 
     public function getPersistentTables(): array
     {
-        $tables = $this->bundleConfig['persistent_tables'] ?? [];
-        if (isset($GLOBALS['PERSISTENT_VERSION_TABLES']) && is_array($GLOBALS['PERSISTENT_VERSION_TABLES']) && !empty($GLOBALS['PERSISTENT_VERSION_TABLES'])) {
-            $tables = array_merge($tables, $GLOBALS['PERSISTENT_VERSION_TABLES']);
+        if (null === $this->persistentTables) {
+            $tables = $this->bundleConfig['persistent_tables'] ?? [];
+            if (isset($GLOBALS['PERSISTENT_VERSION_TABLES']) && is_array($GLOBALS['PERSISTENT_VERSION_TABLES']) && !empty($GLOBALS['PERSISTENT_VERSION_TABLES'])) {
+                $tables = array_merge($tables, $GLOBALS['PERSISTENT_VERSION_TABLES']);
+            }
+            $this->persistentTables = array_unique($tables);
         }
-        return array_unique($tables);
+        return $this->persistentTables;
     }
 
     /**
