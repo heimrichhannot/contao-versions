@@ -19,6 +19,45 @@ huh_versions:
     - tl_keep_forever
 ```
 
+## Create a new version entry
+
+Instead of using the versions class direct, you can use the `VersionControl` service instead.
+
+```php
+use Contao\FrontendUser;
+use Contao\Versions;
+use HeimrichHannot\VersionsBundle\Version\VersionControl;
+
+class MyCustomEntity 
+{
+    /** @var VersionControl */
+    private $versionControl;
+
+    protected function createVersion(int $id, FrontendUser $member): void
+    {
+        // Simple call
+        $this->versionControl->createVersion('tl_my_custom_entity', $id);
+        
+        // Pass additional options
+        $this->versionControl->createVersion('tl_my_custom_entity', $id, [
+            'hideUser' => false,
+            'additionalData' => [
+                'memberid' => $member->id,
+                'memberusername' => $member->username,
+                'username' => 'FrontendUser',
+                'userid' => 0,
+            ],
+            'instance' => new Versions('tl_my_custom_entity', $id),
+        ]);
+    }
+}
+```
+
+**VersionControl::createVersion options:**
+- _hideUser_: Don't add user to version log entry
+- _additionalData_: Pass data that should be stored within the log entry. The array keys must be existing database entries.
+- _instance_: Pass a custom versions instance instead of the default one.
+
 ## Configuration reference
 
 ```yaml
