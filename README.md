@@ -54,9 +54,9 @@ class MyCustomEntity
 ```
 
 **VersionControl::createVersion options:**
-- _hideUser_: (bool) Don't add user to version log entry. Default false
-- _additionalData_: Pass data that should be stored within the log entry. The array keys must be existing database column names. Default null
-- _instance_: Pass a custom `Versions` instance instead of the default one. Default null
+- _hideUser_: (`bool`) Don't add user to version log entry. Default `false`
+- _additionalData_: (`array`|`null`) Pass data that should be stored within the log entry. The array keys must be existing database column names. Default `null`
+- _instance_: (`Version`|`null`)Pass a custom `Versions` instance instead of the default one. Default `null`
 
 ## Configuration reference
 
