@@ -10,9 +10,12 @@
 
 namespace HeimrichHannot\Versions;
 
-
-use HeimrichHannot\Haste\Security\CodeGenerator;
-
+/**
+ * Class VersionUser
+ * @package HeimrichHannot\Versions
+ *
+ * @deprecated Will be removed in next major version
+ */
 class VersionUser
 {
 	const VERSION_USER_NAME  = 'contao-versions-robot';

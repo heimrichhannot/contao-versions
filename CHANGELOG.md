@@ -1,6 +1,15 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [Unreleased] - 2021-06-21
+- added configuration for persistent tables and persistent tables version period
+- added utils bundle dependency
+- refactored Versions class to contao 4.9 base
+- refactored legacy classes into services
+- deprecated Version, VersionUser and VersionModel
+- removed Haste_plus dependencies
+- fixed Ambiguous class resolution warning
+
 ## [2.2.0] - 2020-06-29
 - removed `Encryption` call -> not usable in php 7.4 anymore
 
