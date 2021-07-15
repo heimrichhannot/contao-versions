@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [Unreleased] - 2021-06-21
+## [2.3.0] - 2021-07-15
 - added configuration for persistent tables and persistent tables version period
 - added utils bundle dependency
 - refactored Versions class to contao 4.9 base
