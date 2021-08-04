@@ -1,14 +1,17 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.3.1] - 2021-08-04
+- Fixed: exception when Versions class has not user set in frontend
+
 ## [2.3.0] - 2021-07-15
-- added configuration for persistent tables and persistent tables version period
-- added utils bundle dependency
-- refactored Versions class to contao 4.9 base
-- refactored legacy classes into services
-- deprecated Version, VersionUser and VersionModel
-- removed Haste_plus dependencies
-- fixed Ambiguous class resolution warning
+- Added: configuration for persistent tables and persistent tables version period
+- Added: utils bundle dependency
+- Changed: refactored Versions class to contao 4.9 base
+- Changed: refactored legacy classes into services
+- Changed: removed Haste_plus dependencies
+- Deprecated: Version, VersionUser and VersionModel
+- Fixed: Ambiguous class resolution warning
 
 ## [2.2.0] - 2020-06-29
 - removed `Encryption` call -> not usable in php 7.4 anymore
