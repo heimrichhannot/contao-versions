@@ -1,8 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [2.4.0] - 2021-08-31
+## [2.4.1] - 2023-10-24
+- Fixed: deprecated dbal method
 
+## [2.4.0] - 2021-08-31
 - Added: support for php 8
 
 ## [2.3.1] - 2021-08-04

@@ -62,8 +62,7 @@ class VersionControl
             $GLOBALS['TL_DCA'][$table]['config']['oncreate_version_callback']['huh_versions_additional_data_'.$table.'_'.$id] =
                 function (string $table, int $pid, int $version, array $data) use ($connection, $additionalData) {
                     $stmt = $connection->prepare('SELECT id FROM tl_version WHERE fromTable=? AND pid=? AND version=?');
-                    $stmt->execute([$table, $pid, $version]);
-                    $id = $stmt->fetchColumn(0);
+                    $id = $stmt->executeQuery([$table, $pid, $version])->fetchOne();
                     $stmt = $connection->prepare('UPDATE tl_version SET '.implode('=?, ', array_keys($additionalData)).'=? WHERE id=?');
                     $stmt->execute(array_merge(array_values($additionalData), [$id]));
                 };
