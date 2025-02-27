@@ -18,7 +18,7 @@ use Contao\UserModel;
  *
  * @deprecated Will be removed in next major version
  */
-class VersionUser
+final class VersionUser
 {
 	const VERSION_USER_NAME  = 'contao-versions-robot';
 	const VERSION_USER_EMAIL = 'robot@contao-versions.local';
