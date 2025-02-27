@@ -1,6 +1,7 @@
 <?php
+
 /**
- * Contao Open Source CMS
+ * Contao Open Source CMS.
  *
  * Copyright (c) 2016 Heimrich & Hannot GmbH
  *
@@ -10,10 +11,8 @@
 
 namespace HeimrichHannot\Versions;
 
-
-use Psr\Log\LogLevel;
-use Contao\CoreBundle\Monolog\ContaoContext;
 use Contao\Controller;
+use Contao\CoreBundle\Monolog\ContaoContext;
 use Contao\FrontendUser;
 use Contao\Model;
 use Contao\RequestToken;
@@ -21,46 +20,37 @@ use Contao\System;
 use Contao\Versions;
 use HeimrichHannot\UtilsBundle\Driver\DC_Table_Utils;
 use HeimrichHannot\VersionsBundle\Version\VersionControl;
+use Psr\Log\LogLevel;
 
 /**
- * Class Version
- * @package HeimrichHannot\Versions
- *
  * @deprecated Will be removed in next major version
  */
 class Version
 {
-	/**
-	 * Set a Versions object by a given model
-	 *
-	 * @param Model $objModel
-	 *
-	 * @return Versions|void
-	 */
-	public static function setFromModel(Model $objModel): ?Versions
-	{
-		Controller::loadDataContainer($objModel->getTable());
+    /**
+     * Set a Versions object by a given model.
+     *
+     * @return Versions|void
+     */
+    public static function setFromModel(Model $objModel): ?Versions
+    {
+        Controller::loadDataContainer($objModel->getTable());
 
-		if (!$GLOBALS['TL_DCA'][$objModel->getTable()]['config']['enableVersioning'])
-		{
-			return null;
-		}
+        if (!$GLOBALS['TL_DCA'][$objModel->getTable()]['config']['enableVersioning']) {
+            return null;
+        }
 
-		return new  Versions($objModel->getTable(), $objModel->id);
-	}
+        return new Versions($objModel->getTable(), $objModel->id);
+    }
 
-	/**
-	 * Create new version or initialize depending on existing version
-	 *
-	 * @param Versions $objVersion
-	 * @param Model $objModel
-	 */
-	public static function createVersion(Versions $objVersion, Model $objModel): void
-	{
-	    $additionalData = null;
+    /**
+     * Create new version or initialize depending on existing version.
+     */
+    public static function createVersion(Versions $objVersion, Model $objModel): void
+    {
+        $additionalData = null;
 
-        if (System::getContainer()->get('security.helper')->isGranted('ROLE_MEMBER') && ($objMember = FrontendUser::getInstance()) !== null)
-        {
+        if (System::getContainer()->get('security.helper')->isGranted('ROLE_MEMBER') && ($objMember = FrontendUser::getInstance()) !== null) {
             $additionalData = [
                 'memberid' => $objMember->id,
                 'memberusername' => $objMember->username,
@@ -73,48 +63,40 @@ class Version
             }
         }
 
-	    System::getContainer()->get(VersionControl::class)->createVersion($objModel->getTable(), $objModel->id, [
-	        'additionalData' => $additionalData,
+        System::getContainer()->get(VersionControl::class)->createVersion($objModel->getTable(), $objModel->id, [
+            'additionalData' => $additionalData,
             'instance' => $objVersion,
         ]);
 
-		$dc = DC_Table_Utils::createFromModel($objModel);
+        $dc = DC_Table_Utils::createFromModel($objModel);
 
-		// Call the onversion_callback
-		if (is_array($GLOBALS['TL_DCA'][$objModel->getTable()]['config']['onversion_callback']))
-		{
+        // Call the onversion_callback
+        if (is_array($GLOBALS['TL_DCA'][$objModel->getTable()]['config']['onversion_callback'])) {
             @trigger_error('Using the "onversion_callback" has been deprecated and will no longer work in Contao 5.0. Use the "oncreate_version_callback" instead.', E_USER_DEPRECATED);
 
-			foreach ($GLOBALS['TL_DCA'][$objModel->getTable()]['config']['onversion_callback'] as $callback)
-			{
-				if (is_array($callback))
-				{
-					$objCallback = System::importStatic($callback[0]);
-					$objCallback->{$callback[1]}($objModel->getTable(), $objModel->id, $dc);
-				} elseif (is_callable($callback))
-				{
-					$callback($objModel->getTable(), $objModel->id, $dc);
-				}
-			}
-		}
+            foreach ($GLOBALS['TL_DCA'][$objModel->getTable()]['config']['onversion_callback'] as $callback) {
+                if (is_array($callback)) {
+                    $objCallback = System::importStatic($callback[0]);
+                    $objCallback->{$callback[1]}($objModel->getTable(), $objModel->id, $dc);
+                } elseif (is_callable($callback)) {
+                    $callback($objModel->getTable(), $objModel->id, $dc);
+                }
+            }
+        }
 
-		System::getContainer()->get('monolog.logger.contao')->log(LogLevel::INFO, 'A new version of record "' . $objModel->getTable() . '.id=' . $objModel->id . '" has been created', ['contao' => new ContaoContext(__METHOD__, ContaoContext::GENERAL)]);
-	}
-
-	/**
-	 * Create a version by a given model
-	 *
-	 * @param Model $objModel
-	 */
-	public static function createFromModel(Model $objModel): void
-	{
-		static::createVersion(static::setFromModel($objModel), $objModel);
-	}
+        System::getContainer()->get('monolog.logger.contao')->log(LogLevel::INFO, 'A new version of record "' . $objModel->getTable() . '.id=' . $objModel->id . '" has been created', [
+            'contao' => new ContaoContext(__METHOD__, ContaoContext::GENERAL),
+        ]);
+    }
 
     /**
-     * @param Model $objModel
-     * @param Versions $objVersion
+     * Create a version by a given model.
      */
+    public static function createFromModel(Model $objModel): void
+    {
+        static::createVersion(static::setFromModel($objModel), $objModel);
+    }
+
     private static function generateBackendEditUrlForFrontend(Model $objModel, Versions $objVersion): string
     {
         foreach ($GLOBALS['BE_MOD'] as $strGroup => $arrGroup) {
@@ -134,6 +116,7 @@ class Version
                 }
             }
         }
+
         return '';
     }
 }

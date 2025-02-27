@@ -20,18 +20,17 @@ class VersionControl
      * @var Connection
      */
     protected $connection;
+
     /**
      * @var RequestStack
      */
     protected $requestStack;
+
     /**
      * @var ScopeMatcher
      */
     protected $scopeMatcher;
 
-    /**
-     * VersionControl constructor.
-     */
     public function __construct(Connection $connection, RequestStack $requestStack, ScopeMatcher $scopeMatcher)
     {
         $this->connection = $connection;
@@ -59,11 +58,11 @@ class VersionControl
         if (!empty($options['additionalData'])) {
             $connection = $this->connection;
             $additionalData = $options['additionalData'];
-            $GLOBALS['TL_DCA'][$table]['config']['oncreate_version_callback']['huh_versions_additional_data_'.$table.'_'.$id] =
+            $GLOBALS['TL_DCA'][$table]['config']['oncreate_version_callback']['huh_versions_additional_data_' . $table . '_' . $id] =
                 function (string $table, int $pid, int $version, array $data) use ($connection, $additionalData) {
                     $stmt = $connection->prepare('SELECT id FROM tl_version WHERE fromTable=? AND pid=? AND version=?');
                     $id = $stmt->executeQuery([$table, $pid, $version])->fetchOne();
-                    $stmt = $connection->prepare('UPDATE tl_version SET '.implode('=?, ', array_keys($additionalData)).'=? WHERE id=?');
+                    $stmt = $connection->prepare('UPDATE tl_version SET ' . implode('=?, ', array_keys($additionalData)) . '=? WHERE id=?');
                     $stmt->execute(array_merge(array_values($additionalData), [$id]));
                 };
         }
@@ -82,7 +81,7 @@ class VersionControl
 
         $versions->create($options['hideUser']);
 
-        unset($GLOBALS['TL_DCA'][$table]['config']['oncreate_version_callback']['huh_versions_additional_data_'.$table.'_'.$id]);
+        unset($GLOBALS['TL_DCA'][$table]['config']['oncreate_version_callback']['huh_versions_additional_data_' . $table . '_' . $id]);
     }
 
     public function getVersionsInstance(string $table, int $id)

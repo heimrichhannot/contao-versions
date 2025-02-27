@@ -1,6 +1,7 @@
 <?php
+
 /**
- * Contao Open Source CMS
+ * Contao Open Source CMS.
  *
  * Copyright (c) 2016 Heimrich & Hannot GmbH
  *
@@ -13,129 +14,116 @@ namespace HeimrichHannot\Versions;
 use Contao\UserModel;
 
 /**
- * Class VersionUser
- * @package HeimrichHannot\Versions
- *
  * @deprecated Will be removed in next major version
  */
 final class VersionUser
 {
-	const VERSION_USER_NAME  = 'contao-versions-robot';
-	const VERSION_USER_EMAIL = 'robot@contao-versions.local';
+    public const VERSION_USER_NAME = 'contao-versions-robot';
 
-	/**
-	 * Object instance (Singleton)
-	 *
-	 * @var VersionUser
-	 */
-	protected static $objInstance;
+    public const VERSION_USER_EMAIL = 'robot@contao-versions.local';
 
+    /**
+     * Object instance (Singleton).
+     *
+     * @var VersionUser
+     */
+    protected static $objInstance;
 
-	/**
-	 * The user data
-	 *
-	 * @var
-	 */
-	protected $arrData;
+    /**
+     * The user data.
+     */
+    protected $arrData;
 
-	/**
-	 * Prevent direct instantiation (Singleton)
-	 *
-	 */
-	protected function __construct()
-	{
-		if (($objUser = UserModel::findByUsername(static::VERSION_USER_EMAIL)) === null)
-		{
-			$objUser           = new UserModel();
-			$objUser->username = $objUser->email = static::VERSION_USER_EMAIL;
-			$objUser->name     = static::VERSION_USER_NAME;
-			// at least something must be in there
-			$objUser->password  = md5(random_int(0, 999999999));
-			$objUser->disable   = true;
-			$objUser->dateAdded = $objUser->tstamp = time();
-			$objUser->save();
-		}
+    /**
+     * Prevent direct instantiation (Singleton).
+     */
+    protected function __construct()
+    {
+        if (($objUser = UserModel::findByUsername(static::VERSION_USER_EMAIL)) === null) {
+            $objUser = new UserModel();
+            $objUser->username = $objUser->email = static::VERSION_USER_EMAIL;
+            $objUser->name = static::VERSION_USER_NAME;
+            // at least something must be in there
+            $objUser->password = md5(random_int(0, 999999999));
+            $objUser->disable = true;
+            $objUser->dateAdded = $objUser->tstamp = time();
+            $objUser->save();
+        }
 
-		$this->arrData = $objUser->row();
-	}
+        $this->arrData = $objUser->row();
+    }
 
+    /**
+     * Prevent cloning of the object (Singleton).
+     *
+     * @deprecated Environment is now a static class
+     */
+    final public function __clone()
+    {
+    }
 
-	/**
-	 * Prevent cloning of the object (Singleton)
-	 *
-	 * @deprecated Environment is now a static class
-	 */
-	final public function __clone() { }
+    /**
+     * Return the object instance (Singleton).
+     *
+     * @return VersionUser The object instance
+     */
+    public static function getInstance()
+    {
+        if (null === static::$objInstance) {
+            static::$objInstance = new static();
+        }
 
+        return static::$objInstance;
+    }
 
-	/**
-	 * Return the object instance (Singleton)
-	 *
-	 * @return VersionUser The object instance
-	 *
-	 */
-	public static function getInstance()
-	{
-		if (static::$objInstance === null)
-		{
-			static::$objInstance = new static();
-		}
+    /**
+     * Set an object property.
+     *
+     * @param string $strKey   The property name
+     * @param mixed  $varValue The property value
+     */
+    public function __set($strKey, $varValue)
+    {
+        $this->arrData[$strKey] = $varValue;
+    }
 
-		return static::$objInstance;
-	}
+    /**
+     * Return an object property.
+     *
+     * @param string $strKey The property name
+     *
+     * @return mixed The property value
+     */
+    public function __get($strKey)
+    {
+        if (isset($this->arrData[$strKey])) {
+            if (is_object($this->arrData[$strKey]) && is_callable($this->arrData[$strKey])) {
+                return $this->arrData[$strKey]();
+            }
 
-	/**
-	 * Set an object property
-	 *
-	 * @param string $strKey   The property name
-	 * @param mixed  $varValue The property value
-	 */
-	public function __set($strKey, $varValue)
-	{
-		$this->arrData[$strKey] = $varValue;
-	}
+            return $this->arrData[$strKey];
+        }
+    }
 
+    /**
+     * Check whether a property is set.
+     *
+     * @param string $strKey The property name
+     *
+     * @return bool True if the property is set
+     */
+    public function __isset($strKey)
+    {
+        return isset($this->arrData[$strKey]);
+    }
 
-	/**
-	 * Return an object property
-	 *
-	 * @param string $strKey The property name
-	 *
-	 * @return mixed The property value
-	 */
-	public function __get($strKey)
-	{
-		if (isset($this->arrData[$strKey]))
-		{
-			if (is_object($this->arrData[$strKey]) && is_callable($this->arrData[$strKey]))
-			{
-				return $this->arrData[$strKey]();
-			}
-
-			return $this->arrData[$strKey];
-		}
-	}
-
-	/**
-	 * Check whether a property is set
-	 *
-	 * @param string $strKey The property name
-	 *
-	 * @return boolean True if the property is set
-	 */
-	public function __isset($strKey)
-	{
-		return isset($this->arrData[$strKey]);
-	}
-
-
-	/**
-	 * Return the user data as array
-	 *
-	 * @return array The data array
-	 */
-	public function getData()
-	{
-		return $this->arrData;
-	}
+    /**
+     * Return the user data as array.
+     *
+     * @return array The data array
+     */
+    public function getData()
+    {
+        return $this->arrData;
+    }
 }

@@ -1,6 +1,7 @@
 <?php
+
 /**
- * Contao Open Source CMS
+ * Contao Open Source CMS.
  *
  * Copyright (c) 2021 Heimrich & Hannot GmbH
  *
@@ -8,9 +9,7 @@
  * @license http://www.gnu.org/licences/lgpl-3.0.html LGPL
  */
 
-
 namespace HeimrichHannot\VersionsBundle;
-
 
 use HeimrichHannot\VersionsBundle\DependencyInjection\HeimrichHannotVersionsExtension;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
@@ -21,5 +20,4 @@ class HeimrichHannotVersionsBundle extends Bundle
     {
         return new HeimrichHannotVersionsExtension();
     }
-
 }

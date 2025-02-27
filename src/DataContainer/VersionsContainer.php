@@ -1,6 +1,7 @@
 <?php
+
 /**
- * Contao Open Source CMS
+ * Contao Open Source CMS.
  *
  * Copyright (c) 2021 Heimrich & Hannot GmbH
  *
@@ -8,48 +9,48 @@
  * @license http://www.gnu.org/licences/lgpl-3.0.html LGPL
  */
 
-
 namespace HeimrichHannot\VersionsBundle\DataContainer;
 
-
-use Doctrine\DBAL\Exception;
 use Contao\Automator;
 use Contao\Config;
 use Contao\CoreBundle\Monolog\ContaoContext;
 use Contao\System;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 
 class VersionsContainer
 {
-    /** @var array */
+    /**
+     * @var array
+     */
     protected $bundleConfig = [];
+
     /**
      * @var Connection
      */
     protected $connection;
 
-    /** @var LoggerInterface */
+    /**
+     * @var LoggerInterface
+     */
     private $logger;
 
-    /** @var array|null */
-    protected $persistentTables = null;
-
     /**
-     * VersionsContainer constructor.
-     * @param array $bundleConfig
-     * @param LoggerInterface $logger
+     * @var array|null
      */
+    protected $persistentTables;
+
     public function __construct(LoggerInterface $logger, array $bundleConfig, Connection $connection)
     {
         $this->bundleConfig = $bundleConfig;
-        $this->logger       = $logger;
+        $this->logger = $logger;
         $this->connection = $connection;
     }
 
     /**
-     * Clean the version table respecting persistent table configuration
+     * Clean the version table respecting persistent table configuration.
      *
      * @throws Exception
      * @throws Exception
@@ -58,19 +59,19 @@ class VersionsContainer
     {
         if ($this->hasPersistentTables()) {
             // Fallback for legacy integrations, will be default 0 in version 3.
-            $period = $this->bundleConfig['persistent_version_period'] ?? (int)Config::get('versionPeriod');
-            $tstamp = $period > 0 ?  time() - (int)Config::get('versionPeriod') : 0;
+            $period = $this->bundleConfig['persistent_version_period'] ?? (int) Config::get('versionPeriod');
+            $tstamp = $period > 0 ? time() - (int) Config::get('versionPeriod') : 0;
             $this->connection->executeQuery("DELETE FROM tl_version WHERE tstamp<$tstamp AND fromTable NOT IN('" . implode('\',\'', $this->getPersistentTables()) . "')");
         } else {
             // Truncate the table
             // Delete old versions from the database
-            $tstamp = time() - (int)Config::get('versionPeriod');
+            $tstamp = time() - (int) Config::get('versionPeriod');
             $this->connection->executeQuery("DELETE FROM tl_version WHERE tstamp<$tstamp");
         }
     }
 
     /**
-     * Purge the version table respecting persistent table configuration
+     * Purge the version table respecting persistent table configuration.
      *
      * @throws Exception
      * @throws Exception
@@ -102,11 +103,12 @@ class VersionsContainer
             }
             $this->persistentTables = array_unique($tables);
         }
+
         return $this->persistentTables;
     }
 
     /**
-     * Add a log entry to the database
+     * Add a log entry to the database.
      *
      * @param string $text     The log message
      * @param string $function The function name
@@ -115,6 +117,8 @@ class VersionsContainer
     public function log(string $text, string $function, ?string $category = null): void
     {
         $level = 'ERROR' === $category ? LogLevel::ERROR : LogLevel::INFO;
-        $this->logger->log($level, $text, ['contao' => new ContaoContext($function, $category)]);
+        $this->logger->log($level, $text, [
+            'contao' => new ContaoContext($function, $category),
+        ]);
     }
 }
