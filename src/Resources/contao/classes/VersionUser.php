@@ -10,6 +10,8 @@
 
 namespace HeimrichHannot\Versions;
 
+use Contao\UserModel;
+
 /**
  * Class VersionUser
  * @package HeimrichHannot\Versions
@@ -42,13 +44,13 @@ class VersionUser
 	 */
 	protected function __construct()
 	{
-		if (($objUser = \UserModel::findByUsername(static::VERSION_USER_EMAIL)) === null)
+		if (($objUser = UserModel::findByUsername(static::VERSION_USER_EMAIL)) === null)
 		{
-			$objUser           = new \UserModel();
+			$objUser           = new UserModel();
 			$objUser->username = $objUser->email = static::VERSION_USER_EMAIL;
 			$objUser->name     = static::VERSION_USER_NAME;
 			// at least something must be in there
-			$objUser->password  = md5(rand(0, 999999999));
+			$objUser->password  = md5(random_int(0, 999999999));
 			$objUser->disable   = true;
 			$objUser->dateAdded = $objUser->tstamp = time();
 			$objUser->save();

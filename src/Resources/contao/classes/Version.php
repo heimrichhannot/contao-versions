@@ -11,6 +11,8 @@
 namespace HeimrichHannot\Versions;
 
 
+use Psr\Log\LogLevel;
+use Contao\CoreBundle\Monolog\ContaoContext;
 use Contao\Controller;
 use Contao\FrontendUser;
 use Contao\Model;
@@ -53,11 +55,11 @@ class Version
 	 * @param Versions $objVersion
 	 * @param Model $objModel
 	 */
-	public static function createVersion(Versions $objVersion, Model $objModel)
+	public static function createVersion(Versions $objVersion, Model $objModel): void
 	{
 	    $additionalData = null;
 
-        if (FE_USER_LOGGED_IN && ($objMember = FrontendUser::getInstance()) !== null)
+        if (System::getContainer()->get('security.helper')->isGranted('ROLE_MEMBER') && ($objMember = FrontendUser::getInstance()) !== null)
         {
             $additionalData = [
                 'memberid' => $objMember->id,
@@ -96,11 +98,7 @@ class Version
 			}
 		}
 
-		System::log(
-			'A new version of record "' . $objModel->getTable() . '.id=' . $objModel->id . '" has been created',
-			__METHOD__,
-			TL_GENERAL
-		);
+		System::getContainer()->get('monolog.logger.contao')->log(LogLevel::INFO, 'A new version of record "' . $objModel->getTable() . '.id=' . $objModel->id . '" has been created', ['contao' => new ContaoContext(__METHOD__, ContaoContext::GENERAL)]);
 	}
 
 	/**
@@ -108,7 +106,7 @@ class Version
 	 *
 	 * @param Model $objModel
 	 */
-	public static function createFromModel(Model $objModel)
+	public static function createFromModel(Model $objModel): void
 	{
 		static::createVersion(static::setFromModel($objModel), $objModel);
 	}

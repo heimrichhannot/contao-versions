@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.4.2-DEV] - 2025-02-27
+- Changed: require at least php 7.
+- Changed: code quality improvements
+- Fixed: array key warning
+
 ## [2.4.1] - 2023-10-24
 - Fixed: deprecated dbal method
 

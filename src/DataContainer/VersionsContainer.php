@@ -12,6 +12,7 @@
 namespace HeimrichHannot\VersionsBundle\DataContainer;
 
 
+use Doctrine\DBAL\Exception;
 use Contao\Automator;
 use Contao\Config;
 use Contao\CoreBundle\Monolog\ContaoContext;
@@ -50,8 +51,8 @@ class VersionsContainer
     /**
      * Clean the version table respecting persistent table configuration
      *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
+     * @throws Exception
      */
     public function cleanTable(): void
     {
@@ -71,15 +72,15 @@ class VersionsContainer
     /**
      * Purge the version table respecting persistent table configuration
      *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
+     * @throws Exception
      */
     public function purgeTable(): void
     {
         if ($this->hasPersistentTables()) {
             $this->connection->executeQuery("DELETE FROM tl_version WHERE fromTable NOT IN('" . implode('\',\'', $this->getPersistentTables()) . "')");
 
-            $this->log('Cleared non persistent entries from version table', __METHOD__, TL_CRON);
+            $this->log('Cleared non persistent entries from version table', __METHOD__, ContaoContext::CRON);
         } else {
             /** @var Automator $automator */
             $automator = System::importStatic(Automator::class);
@@ -111,9 +112,9 @@ class VersionsContainer
      * @param string $function The function name
      * @param string $category The category name
      */
-    public function log(string $text, string $function, ?string $category = null)
+    public function log(string $text, string $function, ?string $category = null): void
     {
         $level = 'ERROR' === $category ? LogLevel::ERROR : LogLevel::INFO;
-        $this->logger->log($level, $text, array('contao' => new ContaoContext($function, $category)));
+        $this->logger->log($level, $text, ['contao' => new ContaoContext($function, $category)]);
     }
 }

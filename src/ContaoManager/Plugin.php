@@ -18,7 +18,7 @@ class Plugin implements BundlePluginInterface
     {
         return [
             BundleConfig::create(VersionsBundle::class)
-                ->setLoadAfter(['Contao\CoreBundle\ContaoCoreBundle']),
+                ->setLoadAfter([ContaoCoreBundle::class]),
             BundleConfig::create(HeimrichHannotVersionsBundle::class)
                 ->setLoadAfter([ContaoCoreBundle::class]),
         ];

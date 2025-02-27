@@ -33,7 +33,7 @@ class VersionModel extends Model
 
         $arrColumns = ["$t.fromTable = ? AND $t.pid = ? AND $t.active = 1"];
 
-        if (!$arrOptions['order'])
+        if (!($arrOptions['order'] ?? null))
         {
             $arrOptions['order'] = "$t.version DESC";
         }
@@ -78,7 +78,7 @@ class VersionModel extends Model
 
         $arrColumns = ["$t.fromTable = ? AND $t.pid = ? AND $t.active = 1"];
 
-        if (!$arrOptions['order'])
+        if (!($arrOptions['order'] ?? null))
         {
             $arrOptions['order'] = "$t.version DESC";
         }
