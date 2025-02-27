@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [2.4.2-DEV] - 2025-02-27
+## [2.4.2] - 2025-02-27
 - Changed: require at least php 7.
 - Changed: code quality improvements
 - Fixed: array key warning
